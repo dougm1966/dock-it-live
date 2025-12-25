@@ -1,11 +1,58 @@
 # CueSport Scoreboard Enhancement Plan (UPDATED)
 
 ## Overview
-Adding player photo circles inside name bars and corner logo slideshows with customizable sizing and drag-and-drop positioning.
+Adding player photo circles inside name bars, corner logo slideshows with customizable sizing, and control panel layout improvements.
 
 ---
 
-## Phase 1: Player Photo Circles
+## Phase 0: Control Panel Layout Redesign
+
+### Current Status
+- Phase 1 (Player Photos) is COMPLETE and working
+
+### Control Panel Layout Changes
+
+#### Score Buttons - Reorganize by Action
+**Current:** Each player has +1/-1 stacked vertically
+**New:** Group by action type
+```
+Row 1: [ Doug +1 Score ] [ Mark +1 Score ]
+Row 2: [ Doug -1 Score ] [ Mark -1 Score ]
+```
+
+#### Shot Clock Row - 3 Buttons Side by Side
+**Current:** Cramped "30s SL", "Clock" buttons with abbreviated labels
+**New:** Full-width row with clear labels
+```
+[ 30s Shot Clock ] [ 60s Shot Clock ] [ Hide Clock ]
+```
+
+#### Extension Buttons - Dual Purpose Toggle
+**Current:** Separate "Doug's Extension" button AND "Reset Doug's Ext" button
+**New:** Single toggle button that changes label based on state
+
+- **Default state:** "Doug's Extension" / "Mark's Extension"
+- **After clicked (extension used):** Label changes to "Reset Doug's Extension" / "Reset Mark's Extension"
+- **Click again:** Resets extension, label returns to original
+
+**This eliminates the separate "Reset Doug's Ext" and "Reset Mark's Ext" buttons from the Reset section.**
+
+#### Updated Button Flow (Top to Bottom)
+1. Player info section (names, photos, game info)
+2. Update Info button
+3. Color dropdowns + Swap
+4. Score buttons (reorganized: +1s together, -1s together)
+5. Shot clock row: 30s | 60s | Hide Clock
+6. Extension buttons (dual-purpose toggle)
+7. Stop Clock button
+8. Reset Scores and Extensions
+9. Logo/checkbox section
+10. Sponsor Logos section
+11. **NEW: Corner Logos section (Phase 2)**
+
+---
+
+## Phase 1: Player Photo Circles (COMPLETE ✓)
 
 ### Prompt 1A: Add Player Photo Upload Controls Next to Name Fields
 ```
