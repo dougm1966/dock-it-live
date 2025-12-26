@@ -1,9 +1,10 @@
 'use strict';
 
 /**
- * g4ScoreBoard Shot Clock Display - Main Entry Point
- * Copyright 2022-2025 Norman Gholson IV
- * https://g4billiards.com http://www.g4creations.com
+ * PCPL ScoreBoard Shot Clock Display - Main Entry Point
+ * Inspired by g4ScoreBoard concept
+ * GitHub: https://github.com/dougm1966/g4ScoreBoard
+ * Park County Pool League
  *
  * Local display for players on 2nd monitor
  * Simple clock display that receives updates via BroadcastChannel

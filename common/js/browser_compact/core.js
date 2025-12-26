@@ -1,14 +1,14 @@
 'use strict';
 
 /**
- * g4ScoreBoard Browser Compact - Main Entry Point
- * Copyright 2022-2025 Norman Gholson IV
- * https://g4billiards.com http://www.g4creations.com
+ * PCPL ScoreBoard Browser Compact - Main Entry Point
+ * Created by Douglas Montgomery of AI1offs
+ * Inspired by g4ScoreBoard concept
+ * GitHub: https://github.com/dougm1966/g4ScoreBoard
+ * Park County Pool League
  *
- * This is a purely javascript/html/css driven scoreboard system for OBS Studio
- * Free to use and modify as long as this copyright statement remains intact.
- * Salotto logo is the copyright of Salotto and is used with their permission.
- * For more information about Salotto please visit https://salotto.app
+ * Creator of Unglove billiard glove - https://unglove.me
+ * AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
  */
 
 import { ShotClock } from './shotclock.js';

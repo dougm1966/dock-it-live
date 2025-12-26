@@ -1,10 +1,8 @@
 'use strict';
-//  G4ScoreBoard addon for OBS Copyright 2022-2025 Norman Gholson IV
-//  https://g4billiards.com http://www.g4creations.com
-//  this is a purely javascript/html/css driven scoreboard system for OBS Studio
-//  free to use and modify and use as long as this copyright statment remains intact. 
-//  Salotto logo is the copyright of Salotto and is used with their permission.
-//  for more information about Salotto please visit https://salotto.app
+//  PCPL ScoreBoard addon for OBS
+//  Inspired by g4ScoreBoard concept
+//  GitHub: https://github.com/dougm1966/g4ScoreBoard
+//  Park County Pool League
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// variable declarations

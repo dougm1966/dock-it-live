@@ -204,4 +204,4 @@ For future reference, track typical file sizes:
 ---
 
 *Last Updated: December 26, 2025*
-*Analysis based on G4ScoreBoard v2.0.0*
+*Analysis based on PCPL ScoreBoard v2.0.0*

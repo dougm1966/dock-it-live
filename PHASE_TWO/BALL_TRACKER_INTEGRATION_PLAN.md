@@ -2,7 +2,18 @@
 ## Phase Two: Solids/Stripes Integration
 
 ### Project Overview
-Integrate the `g4BallTracker-1.0.3` functionality directly into the main `PCPL ScoreBoard` system, allowing users to select "solids" or "stripes" for each player and display these selections under the player names in the browser source.
+Integrate the ball tracking functionality directly into the main `g4ScoreBoard` system.
+
+Primary goals:
+
+- [ ] Provide a **settings toggle** to enable/disable ball tracking.
+- [ ] When enabled, provide **8-ball player assignment (solids/stripes) with Swap** and display balls **directly under each player name**.
+- [ ] Pocketed balls are **faded but still visible** (no collapsing spacing).
+- [ ] When assignments are unassigned, show **placeholders** with defaults:
+  - [ ] P1 defaults to **solids placeholders**.
+  - [ ] P2 defaults to **stripes placeholders**.
+  - [ ] Swap flips these defaults.
+- [ ] 9-ball and 10-ball: keep the current behavior (no major refactor).
 
 ### Current Architecture Analysis
 
@@ -20,259 +31,257 @@ Integrate the `g4BallTracker-1.0.3` functionality directly into the main `PCPL S
 - **Assets**: Ball images in multiple color schemes (black, white, standard, AI_render)
 - **Configuration**: Flexible positioning and sizing options
 
+#### Current Repo Reality (as of this plan)
+- [ ] The repo contains a working standalone ball tracker under `PCLS-Balls/`.
+- [ ] There is no `g4BallTracker-1.0.3/` directory in this repo workspace; legacy references should be updated/removed.
+
 ### Integration Strategy
 
-#### 1. Control Panel Enhancement
-**Location**: Add new section in `control_panel.html` after player colors (line ~136)
+## Scope Decisions
 
-**Components**:
-- Player 1 ball type selection (Solids/Stripes/Not Assigned)
-- Player 2 ball type selection (Solids/Stripes/Not Assigned)
-- Ball tracker controls (show/hide, reset, game type)
-- Ball size selector
-- Integration toggle (enable/disable ball tracking)
+- [ ] 8-ball receives a **major refactor** (player-assigned sets displayed under player names).
+- [ ] 9-ball and 10-ball stay functionally the same.
+- [ ] The standalone tracker (`PCLS-Balls`) is used as reference; end goal is integrated functionality in main scoreboard.
 
-**UI Elements**:
-```html
-<section class="section-card" id="ballTrackerSection">
-  <div class="section-card__title">Ball Tracker</div>
-  <div class="grid-section grid-cols-2">
-    <div class="input-group">
-      <label>P1 Ball Type:</label>
-      <select id="p1BallType" class="select-field obs28" onchange="ballTypeChange(1)">
-        <option value="unassigned">Not Assigned</option>
-        <option value="solids">Solids</option>
-        <option value="stripes">Stripes</option>
-      </select>
-    </div>
-    <div class="input-group">
-      <label>P2 Ball Type:</label>
-      <select id="p2BallType" class="select-field obs28" onchange="ballTypeChange(2)">
-        <option value="unassigned">Not Assigned</option>
-        <option value="solids">Solids</option>
-        <option value="stripes">Stripes</option>
-      </select>
-    </div>
-  </div>
-</section>
-```
+## UX Requirements (Locked)
 
-#### 2. Browser Source Display Integration
-**Location**: Modify `browser_source.html` player name cells (lines ~42-57)
+## Two Ball UI Surfaces (Must Stay Distinct)
 
-**Components**:
-- Ball type indicators under player names
-- Ball tracking display (optional overlay)
-- Styled to match existing scoreboard aesthetic
+- [ ] **Control Panel (Operator UI)**: a **single row** of ball toggles/buttons used by the operator to mark balls pocketed/unpocketed, swap assignments, change game type, etc.
+- [ ] **Overlay (Viewer UI)**: balls rendered **under each player name** on the browser source, driven entirely by the authoritative state.
 
-**HTML Structure**:
-```html
-<td id="player1Name" class="bs-player-name">
-  <div class="fadeInElm bs-ext-icon" id="p1ExtIcon">Ex</div>
-  <img id="player1-photo" class="playerPhoto" src="" alt="">
-  <img class="fadeOutElm bs-logo bs-logo-left" id="leftSponsorLogoImg" height="20" src="" alt="">
-  <span class="playerNameText">Player 1</span>
-  <div id="p1BallType" class="bs-ball-type fadeOutElm">SOLIDS</div>
-</td>
-```
+### Layout Rules (Clarity)
 
-#### 3. Communication Layer
-**BroadcastChannel Extensions**:
-- Extend existing `g4-main` channel for ball type messages
-- Add new message types for ball type assignments
-- Maintain compatibility with existing ball tracker
+- [ ] The control panel row is for **input** (operator interaction).
+- [ ] The overlay racks are for **output** (viewer display).
+- [ ] The control panel row and overlay racks are synchronized via the state model; they are not the same UI element.
 
-**Message Protocol**:
-```javascript
-// Ball type assignment
-{
-  ballType: {
-    player: 1|2,
-    type: "solids"|"stripes"|"unassigned"
-  }
-}
+### 8-ball Under-Name Display
 
-// Ball tracker state
+- [ ] Balls appear **directly under the name of each player**.
+- [ ] Each player rack is **7 slots**.
+- [ ] Slots do **not** collapse when pocketed.
+- [ ] Pocketed state is rendered by **fading opacity** while still visible.
+
+### Placeholders + Defaults
+
+- [ ] When ball tracking is enabled but player set is unassigned:
+  - [ ] P1 shows **solids placeholders** (1-7) under P1 name.
+  - [ ] P2 shows **stripes placeholders** (9-15) under P2 name.
+- [ ] Swap flips these defaults.
+
+### Swap
+
+- [ ] Swap must swap which set renders under which player name.
+- [ ] Swap must also swap which ball set appears on the left vs right side of the **ball toggle row** in the master control panel (assignment-following).
+
+### Control Panel Layout (Critical)
+
+- [ ] Ball tracking has a **settings toggle**: enabled/disabled.
+- [ ] When disabled:
+  - [ ] The "Update Info" row remains **full width**, exactly as today.
+  - [ ] Ball tracking UI is hidden.
+- [ ] When enabled:
+  - [ ] The "Update Info" row becomes split: **Game selector on the left**, Update Info button on the right.
+  - [ ] Update Info button width matches the fields above it.
+
+## Message/State Model (Authoritative)
+
+### Persisted Keys (localStorage)
+
+- [ ] `ballTrackingEnabled` (boolean)
+- [ ] `ballTrackerState` (JSON string; authoritative state object)
+
+### Authoritative Payload (BroadcastChannel)
+
+- [ ] Use a single payload that fully describes current state.
+- [ ] Browser source renders purely from state.
+
+```js
 {
   ballTracker: {
     enabled: true|false,
     gameType: "eight"|"nine"|"ten",
     ballSize: 35|45|55,
-    balls: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    assignments: {
+      p1Set: "solids"|"stripes"|"unassigned",
+      p2Set: "solids"|"stripes"|"unassigned"
+    },
+    defaults: {
+      p1Default: "solids"|"stripes" // p2Default is implied as opposite
+    },
+    pocketed: {
+      "1": false,
+      "2": false,
+      "3": false,
+      "4": false,
+      "5": false,
+      "6": false,
+      "7": false,
+      "8": false,
+      "9": false,
+      "10": false,
+      "11": false,
+      "12": false,
+      "13": false,
+      "14": false,
+      "15": false
+    }
   }
 }
 ```
 
-#### 4. CSS Styling
-**New Classes**:
-- `.bs-ball-type` - Ball type indicator styling
-- `.bs-ball-tracker` - Ball tracking overlay styling
-- Responsive scaling with existing CSS variables
+### Messaging Rules
 
-**Style Integration**:
-```css
-.bs-ball-type {
-  font-size: var(--ball-type-font-size, 10pt);
-  font-weight: bold;
-  text-align: center;
-  margin-top: 2px;
-  opacity: 0.8;
-}
+- [ ] When `ballTrackingEnabled` is toggled OFF:
+  - [ ] Broadcast a single `{ ballTracker: { enabled:false } }` state so overlays hide immediately.
+  - [ ] Control panel hides all tracker controls and restores full-width Update Info UI.
+- [ ] When toggled ON:
+  - [ ] Broadcast full state snapshot.
+  - [ ] Default placeholder orientation is P1 solids / P2 stripes.
 
-.bs-ball-type.solids {
-  color: #ff6b6b;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
+## Implementation Phases (Detailed Checklist)
 
-.bs-ball-type.stripes {
-  color: #4ecdc4;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
-```
+### Phase 0: Preflight + Safety
 
-### Implementation Phases
+- [ ] Create a working branch for the refactor.
+- [ ] Confirm which URLs are used in OBS:
+  - [ ] Dock uses `PCLS-Balls/control-panel.html` (standalone reference).
+  - [ ] Browser source uses the main `browser_source.html` overlay.
+- [ ] Confirm ball image asset location to use for integration (source is `PCLS-Balls/images/...`).
 
-#### Phase 1: Core Integration
-1. **Control Panel Addition**
-   - Add ball type selection controls
-   - Implement basic event handlers
-   - Add localStorage persistence
+### Phase 1: Settings Toggle + Control Panel Layout Switching
 
-2. **Browser Source Display**
-   - Add ball type indicators under player names
-   - Implement show/hide functionality
-   - Style integration with existing design
+#### 1.1 Settings Toggle
 
-3. **Communication Layer**
-   - Extend BroadcastChannel messaging
-   - Implement real-time synchronization
-   - Add error handling and fallbacks
+- [ ] Add a settings control: "Enable Ball Tracking".
+- [ ] Persist `ballTrackingEnabled` in localStorage.
+- [ ] On load, apply UI state based on `ballTrackingEnabled`.
 
-#### Phase 2: Ball Tracking Features
-1. **Ball State Management**
-   - Integrate ball tracking logic from `g4BallTracker`
-   - Add ball state persistence
-   - Implement game type switching
+#### 1.2 Update Info Row Layout Switching
 
-2. **Visual Ball Tracking**
-   - Add optional ball tracking overlay
-   - Implement ball click-to-toggle functionality
-   - Add ball size and positioning controls
+- [ ] Implement two mutually exclusive rows:
+  - [ ] Full-width Update Info row (existing)
+  - [ ] Split row containing Game selector + Update Info button
+- [ ] Ensure when ball tracking is OFF, the UI is identical to today.
+- [ ] Ensure when ball tracking is ON, Update Info button width matches the input fields.
 
-3. **Advanced Features**
-   - Automatic ball type assignment based on first pocketed balls
-   - Game state validation (prevent invalid assignments)
-   - Integration with scoring system
+#### 1.3 Ball Tracker Section Visibility
 
-#### Phase 3: Polish & Optimization
-1. **User Experience**
-   - Keyboard shortcuts for ball type assignment
-   - Visual feedback for interactions
-   - Accessibility improvements
+- [ ] Wrap all ball tracker controls inside a container that is only visible when enabled.
+- [ ] Define show/hide rules for all new UI elements.
 
-2. **Performance Optimization**
-   - Optimize BroadcastChannel messaging
-   - Reduce DOM updates
-   - Improve storage efficiency
+### Phase 2: Control Panel Ball Tracking Controls (Enabled Mode)
 
-3. **Testing & Validation**
-   - Cross-browser compatibility testing
-   - OBS integration testing
-   - Performance benchmarking
+#### 2.1 Game Selector (in split row)
 
-### Technical Requirements
+- [ ] Add selector for `eight|nine|ten`.
+- [ ] Decide/reset behavior on game switch:
+  - [ ] Reset pocketed state when switching game types.
+- [ ] Broadcast updated state on change.
 
-#### Dependencies
-- No new external dependencies required
-- Leverages existing BroadcastChannel API
-- Uses existing CSS custom properties system
-- Compatible with current IndexedDB/localStorage setup
+#### 2.2 Player Assignment Controls + Swap
 
-#### File Modifications
-1. `control_panel.html` - Add ball tracker controls
-2. `browser_source.html` - Add ball type displays
-3. `common/css/browser_source.css` - Add new styling
-4. `common/js/control_panel.js` - Add ball type logic
-5. `common/js/browser_source.js` - Add display logic
-6. `common/js/control_panel_post.js` - Add communication logic
+- [ ] P1 Set selector: Unassigned/Solids/Stripes.
+- [ ] P2 Set selector: Unassigned/Solids/Stripes.
+- [ ] Swap button:
+  - [ ] Swaps assignments when assigned.
+  - [ ] If unassigned, swaps defaults (P1 default flips).
+- [ ] Guardrails:
+  - [ ] Prevent invalid state: both players solids or both players stripes.
+  - [ ] Auto-assign the opposite set when one is chosen (unless explicitly overridden).
 
-#### Asset Integration
-- Copy ball images from `g4BallTracker-1.0.3/images/` to `common/images/balls/`
-- Maintain existing ball color schemes
-- Add new ball type indicator graphics if needed
+#### 2.3 Ball Toggle Row in the Main Control Panel (Operator UI)
 
-### Risk Assessment & Mitigation
+- [ ] Add a **single row** of ball buttons/checkboxes inside the main control panel.
+- [ ] Behavior:
+  - [ ] The row is visually split into a left group and right group to match player assignment/default.
+  - [ ] Swap flips which group appears on the left vs right side of the row.
+  - [ ] Toggling marks a ball as pocketed/unpocketed in state.
+- [ ] 8-ball toggle:
+  - [ ] Provide a dedicated 8-ball control.
 
-#### Potential Issues
-1. **BroadcastChannel Compatibility**
-   - Risk: Some OBS versions may have limited support
-   - Mitigation: Fallback to localStorage polling
+#### 2.4 Size + Show/Hide + Reset
 
-2. **Performance Impact**
-   - Risk: Additional DOM updates may affect performance
-   - Mitigation: Optimize update frequency and batch changes
+- [ ] Ball size selector (35/45/55) updates state and persists.
+- [ ] Show/Hide button toggles `ballTracker.enabled`.
+- [ ] Reset button clears pocketed state (and assignments if desired).
 
-3. **Storage Limitations**
-   - Risk: Ball state data may exceed localStorage limits
-   - Mitigation: Use IndexedDB for ball state storage
+### Phase 3: Browser Source 8-Ball Under-Name Rendering
 
-#### Compatibility Considerations
-- Maintain backward compatibility with existing installations
-- Graceful degradation if ball tracking features fail
-- Optional feature activation (can be disabled)
+#### 3.1 HTML Placement
 
-### Success Criteria
+- [ ] Add containers under each player name:
+  - [ ] `p1BallRack` under Player 1 name.
+  - [ ] `p2BallRack` under Player 2 name.
+- [ ] Add neutral 8-ball placement (centered between names OR a dedicated middle container).
 
-#### Functional Requirements
-- [ ] Users can assign solids/stripes to each player
-- [ ] Assignments display under player names in browser source
-- [ ] Real-time synchronization between control panel and browser source
-- [ ] Persistent storage of assignments across sessions
-- [ ] Integration with existing scoring system
+#### 3.2 Placeholder Rendering
 
-#### Non-Functional Requirements
-- [ ] No performance degradation in existing features
-- [ ] Consistent styling with existing scoreboard design
-- [ ] Intuitive user interface matching current design patterns
-- [ ] Reliable operation in OBS Browser Source environment
+- [ ] If P1 is unassigned, render solids placeholders (1-7) under Player 1.
+- [ ] If P2 is unassigned, render stripes placeholders (9-15) under Player 2.
+- [ ] Swap flips which defaults render.
 
-### Timeline Estimate
+#### 3.3 Pocketed Rendering
 
-#### Phase 1: Core Integration (2-3 days)
-- Day 1: Control panel addition and basic styling
-- Day 2: Browser source display and communication layer
-- Day 3: Testing and refinement
+- [ ] Pocketed balls remain visible but faded.
+- [ ] Do not remove elements; apply CSS class/opacity.
 
-#### Phase 2: Ball Tracking Features (3-4 days)
-- Day 4-5: Ball state management and visual tracking
-- Day 6-7: Advanced features and integration
+#### 3.4 Enable/Disable
 
-#### Phase 3: Polish & Optimization (1-2 days)
-- Day 8: User experience improvements and performance optimization
-- Day 9: Final testing and documentation
+- [ ] If ball tracking disabled, hide all ball tracker visuals.
+- [ ] If enabled, show per state.
 
-**Total Estimated Time: 6-9 days**
+### Phase 4: 9-Ball and 10-Ball (Preserve Behavior)
 
-### Next Steps
+- [ ] Keep existing 9-ball and 10-ball presentation logic.
+- [ ] Ensure new state model can represent 9-ball and 10-ball pocketed subset cleanly.
+- [ ] Ensure game switching resets state as planned.
 
-1. **Immediate Actions**
-   - Backup existing files
-   - Create development branch
-   - Set up testing environment
+### Phase 5: Compatibility + Migration
 
-2. **Development Priorities**
-   - Start with Phase 1 core integration
-   - Focus on ball type assignment functionality
-   - Ensure existing features remain unaffected
+- [ ] Decide whether to keep emitting legacy `g4-balls` messages during transition.
+- [ ] Update docs to refer to integrated ball tracking instead of standalone dock.
 
-3. **Testing Strategy**
-   - Test each phase independently
-   - Validate OBS integration throughout
-   - Performance testing with typical usage scenarios
+### Phase 6: Testing Checklist (OBS)
+
+#### 6.1 Control Panel UI
+
+- [ ] Ball tracking toggle OFF:
+  - [ ] Update Info button is full width.
+  - [ ] No game selector is shown.
+  - [ ] No ball tracker controls are shown.
+- [ ] Ball tracking toggle ON:
+  - [ ] Game selector appears to the left of Update Info.
+  - [ ] Update Info button width matches the input fields.
+
+#### 6.2 8-Ball Overlay
+
+- [ ] With tracking enabled, before assignment:
+  - [ ] P1 shows solids placeholders under Player 1.
+  - [ ] P2 shows stripes placeholders under Player 2.
+- [ ] Assign P1=Stripes, P2=Solids:
+  - [ ] Balls appear under correct names.
+- [ ] Swap:
+  - [ ] Under-name racks swap correctly.
+  - [ ] Control panel ball toggle row swaps correctly.
+- [ ] Pocketed toggle:
+  - [ ] Ball fades but stays visible.
+- [ ] Reset:
+  - [ ] Clears pocketed state.
+
+#### 6.3 9/10 Behavior
+
+- [ ] 9-ball display unchanged.
+- [ ] 10-ball display unchanged.
+
+#### 6.4 Show/Hide
+
+- [ ] Show/Hide hides and re-shows ball visuals reliably.
 
 ---
 
-**Document Created**: December 26, 2025  
+**Document Updated**: December 26, 2025  
 **Author**: Cascade AI Assistant  
-**Version**: 1.0  
+**Version**: 2.0  
 **Status**: Planning Phase

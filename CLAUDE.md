@@ -27,7 +27,7 @@ A professional billiard/pool scoreboard solution for OBS Studio streamers.
 - `browser_source/` - Display scaling (100%, 125%, 150%, 200%)
 
 ### OBS Integration
-- `g4ScoreBoard_hotkeys.lua` - Lua script for OBS hotkey bindings
+- `PCPL ScoreBoard_hotkeys.lua` - Lua script for OBS hotkey bindings
 
 ## Key Features
 
