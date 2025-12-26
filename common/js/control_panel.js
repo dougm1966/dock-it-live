@@ -735,3 +735,20 @@ function compareVers(v1, v2) {
     }
     return 0;
 }
+
+// ===== Modal Functions =====
+function openSettingsModal() {
+    document.getElementById('settingsModal').style.display = 'block';
+}
+
+function closeSettingsModal() {
+    document.getElementById('settingsModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('settingsModal');
+    if (event.target == modal) {
+        closeSettingsModal();
+    }
+}

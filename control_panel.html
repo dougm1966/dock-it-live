@@ -46,7 +46,10 @@ for more information about Salotto please visit https://salotto.app
 
 		<!-- Section: Player Information -->
 		<section class="section-card" id="topPlayerGameInfo">
-			<div class="section-card__title">Player Information</div>
+			<div class="section-card__title">
+				<span class="section-title-text">Player Information</span>
+				<button class="settings-btn hover" onclick="openSettingsModal()">Settings</button>
+			</div>
 
 			<div class="input-row">
 				<label>Player 1:</label>
@@ -174,45 +177,6 @@ for more information about Salotto please visit https://salotto.app
 		<section class="section-card">
 			<div class="grid-section grid-cols-1">
 				<div class="btn btn--danger hover obs28" id="resetBtn" onclick="resetScore()">Reset Scores and Extensions</div>
-			</div>
-		</section>
-
-		<!-- Section: Display Settings -->
-		<section class="section-card" id="settingsBox1">
-			<div class="section-card__title">Display Settings</div>
-			<div class="grid-section grid-cols-2">
-				<label class="checkbox-label">
-					<input type="checkbox" class="smallSize" id="allCheck" onchange="allCheck()" checked>
-					<span>All</span>
-				</label>
-				<label class="checkbox-label">
-					<input type="checkbox" class="smallSize" id="useClockSetting" onchange="clockSetting()">
-					<span>Use Clock</span>
-				</label>
-				<label class="checkbox-label">
-					<input type="checkbox" class="smallSize" id="showSponsorLogosSetting" onchange="sponsorLogosSetting()">
-					<span>Sponsor Logos</span>
-				</label>
-				<label class="checkbox-label">
-					<input type="checkbox" class="smallSize" id="showAppearanceSetting" onchange="appearanceSetting()">
-					<span>Appearance</span>
-				</label>
-				<label class="checkbox-label">
-					<input type="checkbox" class="smallSize" id="showLogoUploadsSetting" onchange="logoUploadsSetting()">
-					<span>Logo Uploads</span>
-				</label>
-				<label class="checkbox-label">
-					<input type="checkbox" class="smallSize" id="showPlayerColorsSetting" onchange="playerColorsSetting()">
-					<span>Player Colors</span>
-				</label>
-				<label class="checkbox-label">
-					<input type="checkbox" class="smallSize" id="showLeftSponsorLogoSetting" onchange="leftSponsorLogoSetting()">
-					<span class="hover" onclick="leftSponsorLabelChange()" id="leftSponsorLabel">Custom</span> Logo
-				</label>
-				<label class="checkbox-label">
-					<input type="checkbox" class="smallSize" id="showRightSponsorLogoSetting" onchange="rightSponsorLogoSetting()">
-					<span class="hover" onclick="rightSponsorLabelChange()" id="rightSponsorLabel">Custom</span> Logo
-				</label>
 			</div>
 		</section>
 
@@ -348,5 +312,52 @@ for more information about Salotto please visit https://salotto.app
 	//////////////////// end of HotKey scripts
 	refreshData();
 	</script>
+
+	<!-- Settings Modal -->
+	<div id="settingsModal" class="modal">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2>Display Settings</h2>
+				<button class="modal-close-btn hover" onclick="closeSettingsModal()">&times;</button>
+			</div>
+			<div class="modal-body">
+				<div class="grid-section grid-cols-2">
+					<label class="checkbox-label">
+						<input type="checkbox" class="smallSize" id="allCheck" onchange="allCheck()" checked>
+						<span>All</span>
+					</label>
+					<label class="checkbox-label">
+						<input type="checkbox" class="smallSize" id="useClockSetting" onchange="clockSetting()">
+						<span>Use Clock</span>
+					</label>
+					<label class="checkbox-label">
+						<input type="checkbox" class="smallSize" id="showSponsorLogosSetting" onchange="sponsorLogosSetting()">
+						<span>Sponsor Logos</span>
+					</label>
+					<label class="checkbox-label">
+						<input type="checkbox" class="smallSize" id="showAppearanceSetting" onchange="appearanceSetting()">
+						<span>Appearance</span>
+					</label>
+					<label class="checkbox-label">
+						<input type="checkbox" class="smallSize" id="showLogoUploadsSetting" onchange="logoUploadsSetting()">
+						<span>Logo Uploads</span>
+					</label>
+					<label class="checkbox-label">
+						<input type="checkbox" class="smallSize" id="showPlayerColorsSetting" onchange="playerColorsSetting()">
+						<span>Player Colors</span>
+					</label>
+					<label class="checkbox-label">
+						<input type="checkbox" class="smallSize" id="showLeftSponsorLogoSetting" onchange="leftSponsorLogoSetting()">
+						<span class="hover" onclick="leftSponsorLabelChange()" id="leftSponsorLabel">Custom</span> Logo
+					</label>
+					<label class="checkbox-label">
+						<input type="checkbox" class="smallSize" id="showRightSponsorLogoSetting" onchange="rightSponsorLogoSetting()">
+						<span class="hover" onclick="rightSponsorLabelChange()" id="rightSponsorLabel">Custom</span> Logo
+					</label>
+				</div>
+			</div>
+		</div>
+	</div>
+
 </body>
 </html>
