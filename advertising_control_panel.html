@@ -22,15 +22,182 @@
 			display: none;
 		}
 
+		body.ads-modal-open {
+			overflow: hidden;
+		}
+
+		.ads-color-modal {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.6);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 12px;
+			z-index: 9999;
+			box-sizing: border-box;
+			overflow: hidden;
+			overscroll-behavior: contain;
+		}
+
+		.ads-color-modal__panel {
+			width: min(var(--panel-width, 320px), 100%);
+			max-width: var(--panel-width, 320px);
+			max-height: calc(100vh - 24px);
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+			background: rgba(20, 20, 20, 0.98);
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			border-radius: 14px;
+			padding: 14px;
+			box-sizing: border-box;
+		}
+
+		.ads-color-modal__header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			margin-bottom: 10px;
+		}
+
+		.ads-color-modal__title {
+			font-weight: 700;
+			color: var(--text-primary);
+		}
+
+		.ads-color-modal__close {
+			cursor: pointer;
+			user-select: none;
+			font-weight: 800;
+			width: 28px;
+			height: 28px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.08);
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			color: rgba(255, 255, 255, 0.9);
+		}
+
+		.ads-color-modal__body {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 10px;
+			flex: 1;
+			min-height: 0;
+			overflow: hidden;
+		}
+
+		.ads-color-picker {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 10px;
+			min-height: 0;
+		}
+
+		.ads-color-sv-wrap {
+			position: relative;
+			width: 100%;
+			height: clamp(120px, 22vh, 190px);
+			border-radius: 12px;
+			overflow: hidden;
+			border: 1px solid rgba(255, 255, 255, 0.12);
+		}
+
+		#adsColorSv {
+			width: 100%;
+			height: 100%;
+			display: block;
+			cursor: crosshair;
+			touch-action: none;
+		}
+
+		.ads-color-sv-thumb {
+			position: absolute;
+			width: 14px;
+			height: 14px;
+			border-radius: 999px;
+			border: 2px solid rgba(255, 255, 255, 0.95);
+			box-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+			transform: translate(-7px, -7px);
+			pointer-events: none;
+		}
+
+		.ads-color-row {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			min-width: 0;
+		}
+
+		.ads-color-row__label {
+			min-width: 64px;
+			color: var(--text-primary);
+			font-weight: 600;
+		}
+
+		.ads-color-row input[type="range"] {
+			flex: 1 1 0;
+			min-width: 0;
+		}
+
+		#adsColorAlphaLabel {
+			min-width: 34px;
+			text-align: right;
+			white-space: nowrap;
+			opacity: 0.9;
+		}
+
+		#adsColorHue {
+			-webkit-appearance: none;
+			appearance: none;
+			height: 12px;
+			border-radius: 999px;
+			background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+			outline: none;
+		}
+
+		#adsColorHue::-webkit-slider-runnable-track {
+			height: 12px;
+			border-radius: 999px;
+			background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+		}
+
+		#adsColorHue::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 18px;
+			height: 18px;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.95);
+			border: 2px solid rgba(0, 0, 0, 0.45);
+			margin-top: -3px;
+			box-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+		}
+
+		.ads-color-actions {
+			display: flex;
+			justify-content: flex-end;
+			gap: 10px;
+			margin-top: 6px;
+		}
+
 		.ads-row {
 			display: grid;
 			grid-template-columns: 28px 1fr;
 			gap: 8px;
-			align-items: center;
+			align-items: start;
 			padding: 6px 0;
 		}
 
 		.ads-row__label {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 32px;
 			font-weight: 600;
 			color: var(--text-primary);
 			text-align: center;
@@ -126,13 +293,12 @@
 				<div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
 					<label class="checkbox-label" style="margin:0;">
 						<input type="checkbox" class="smallSize" id="adsFrameArtChk" onchange="adsToggleFrameArt()">
-						<span>Frame Art</span>
+						<span>Guides</span>
 					</label>
 					<label class="checkbox-label" style="margin:0; display:flex; align-items:center; gap:8px;">
 						<span>Background</span>
-						<input type="color" id="adsFrameBgColor" value="#000000" oninput="adsSetFrameBgColor(this.value)" style="width:40px; height:24px; padding:0; border:none; background:transparent;">
-						<input type="range" id="adsFrameBgAlpha" min="0" max="100" step="1" value="0" oninput="adsSetFrameBgAlpha(this.value)" style="width:140px;">
-						<span id="adsFrameBgAlphaLabel" style="min-width:44px; text-align:right;">0%</span>
+						<span id="adsFrameBgOpen" onclick="adsOpenFrameBgModal()" style="cursor:pointer; font-weight:700; text-decoration: underline;">Select Color</span>
+						<span id="adsFrameBgSummary" style="min-width: 90px; opacity: 0.9;"></span>
 					</label>
 				</div>
 			</div>
@@ -500,6 +666,32 @@
 				</div>
 			</div>
 		</section>
+	</div>
+
+	<div id="adsFrameBgModal" class="ads-color-modal noShow" onclick="adsCloseFrameBgModal(true)">
+		<div class="ads-color-modal__panel" onclick="event.stopPropagation()">
+			<div class="ads-color-modal__header">
+				<div class="ads-color-modal__title">Select Background</div>
+				<div class="ads-color-modal__close" onclick="adsCloseFrameBgModal(false)">X</div>
+			</div>
+			<div class="ads-color-modal__body">
+				<div class="ads-color-picker">
+					<div class="ads-color-sv-wrap">
+						<canvas id="adsColorSv" width="600" height="440"></canvas>
+						<div id="adsColorSvThumb" class="ads-color-sv-thumb"></div>
+					</div>
+					<div class="ads-color-row">
+						<div class="ads-color-row__label">Hue</div>
+						<input type="range" id="adsColorHue" min="0" max="360" step="1" value="270" oninput="adsColorModalSetHue(this.value)">
+					</div>
+					<div class="ads-color-row">
+						<div class="ads-color-row__label">Transparency</div>
+						<input type="range" id="adsColorAlpha" min="0" max="100" step="1" value="0" oninput="adsColorModalSetAlpha(this.value)">
+						<div id="adsColorAlphaLabel">0%</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

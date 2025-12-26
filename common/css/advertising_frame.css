@@ -8,9 +8,11 @@ body {
 	background: transparent;
 }
 
- body {
- 	position: relative;
- }
+body {
+	position: relative;
+	--ads-divider-alpha: 0.35;
+	--ads-divider-rgb: 255, 255, 255;
+}
 
 #frameRoot {
 	position: absolute;
@@ -22,15 +24,15 @@ body {
 	transform-origin: top left;
 	display: grid;
 	grid-template-columns: 125px 1670px 125px;
-	grid-template-rows: 125px 830px 125px;
+	grid-template-rows: 125px 955px;
 	grid-template-areas:
 		"top top top"
-		"left center right"
-		"bottom bottom bottom";
+		"left center right";
 }
 
 #adsTop {
 	grid-area: top;
+	position: relative;
 	display: grid;
 	grid-template-columns: repeat(6, 1fr);
 	grid-template-rows: 1fr;
@@ -41,6 +43,7 @@ body {
 
 #adsLeft {
 	grid-area: left;
+	position: relative;
 	display: grid;
 	grid-template-columns: 1fr;
 	grid-template-rows: repeat(3, 1fr);
@@ -51,6 +54,7 @@ body {
 
 #adsRight {
 	grid-area: right;
+	position: relative;
 	display: grid;
 	grid-template-columns: 1fr;
 	grid-template-rows: repeat(3, 1fr);
@@ -63,13 +67,29 @@ body {
 	position: relative;
 	overflow: hidden;
 	background: transparent;
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+	box-shadow: none;
 }
 
- .ad-tile--framed {
- 	outline: 2px solid rgba(255, 255, 255, 0.85);
- 	outline-offset: -2px;
- }
+.ads-divider {
+	position: absolute;
+	pointer-events: none;
+	background: rgba(var(--ads-divider-rgb, 255, 255, 255), var(--ads-divider-alpha, 0.35));
+	z-index: 3;
+}
+
+.ads-divider--v {
+	top: 10%;
+	height: 80%;
+	width: 1px;
+	transform: translateX(-0.5px);
+}
+
+.ads-divider--h {
+	left: 10%;
+	width: 80%;
+	height: 1px;
+	transform: translateY(-0.5px);
+}
 
 .ad-tile img {
 	width: 100%;
@@ -78,32 +98,25 @@ body {
 	display: block;
 }
 
- .ad-title {
- 	position: absolute;
- 	inset: 0;
- 	display: flex;
- 	align-items: center;
- 	justify-content: center;
- 	text-align: center;
- 	color: rgba(255, 255, 255, 0.95);
- 	font-family: Arial, Helvetica, sans-serif;
- 	font-weight: 700;
- 	font-size: 28px;
- 	letter-spacing: 0.5px;
- 	text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
- 	padding: 8px;
- 	box-sizing: border-box;
- }
-
-body.frame-art-on #frameRoot::before {
-	content: "";
+.ad-title {
 	position: absolute;
 	inset: 0;
-	z-index: 1;
-	pointer-events: none;
-	background:
-		linear-gradient(#6b21a8, #6b21a8) top / 100% 125px no-repeat,
-		linear-gradient(#6b21a8, #6b21a8) left / 125px 100% no-repeat,
-		linear-gradient(#6b21a8, #6b21a8) right / 125px 100% no-repeat;
-	opacity: 0.85;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	color: rgba(var(--ads-divider-rgb, 255, 255, 255), 0.95);
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: 700;
+	font-size: 28px;
+	letter-spacing: 0.5px;
+	text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
+	padding: 8px;
+	box-sizing: border-box;
+}
+
+.ad-title--placeholder {
+	opacity: 0.8;
+	font-size: 20px;
+	letter-spacing: 0.2px;
 }

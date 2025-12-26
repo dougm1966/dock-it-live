@@ -67,6 +67,26 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 				<input type="text" id="p1Name" class="input-field" placeholder="Player 1">
 			</div>
 
+			<div class="input-row noShow" id="btCpRowP1">
+				<label class="btcp-col">
+					<select id="btP1Set" class="select-field obs28">
+						<option value="unassigned">Balls</option>
+						<option value="solids">Solids</option>
+						<option value="stripes">Stripes</option>
+					</select>
+				</label>
+				<div class="btcp-rack-wrap">
+					<div id="btCpP1Rack" class="btcp-rack noShow"></div>
+					<div id="btCpP1MidRack" class="btcp-rack btcp-rack--mid noShow"></div>
+					<div id="btCpP1FullRack" class="btcp-rack btcp-rack--full noShow"></div>
+				</div>
+			</div>
+
+			<div class="input-row" style="display: flex; align-items: center; gap: 2px;">
+				<label style="flex-shrink: 0; min-width: 70px; width: 70px;">Fargo/Race<br><span style="display: block; text-align: center; margin-left: -15px;">Action</span></label>
+				<input type="text" id="raceInfoTxt" class="input-field" placeholder="Fargo - 500 | Race to 8 | $50 in the middle" style="flex: 1;">
+			</div>
+
 			<div class="input-row">
 				<label>Player 2:</label>
 				<span class="hover photoUploadBtn" id="p2PhotoBtn">
@@ -80,9 +100,19 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 				<input type="text" id="p2Name" class="input-field" placeholder="Player 2">
 			</div>
 
-			<div class="input-row" style="display: flex; align-items: center; gap: 2px;">
-				<label style="flex-shrink: 0; min-width: 70px; width: 70px;">Fargo/Race<br><span style="display: block; text-align: center; margin-left: -15px;">Action</span></label>
-				<input type="text" id="raceInfoTxt" class="input-field" placeholder="Fargo - 500 | Race to 8 | $50 in the middle" style="flex: 1;">
+			<div class="input-row noShow" id="btCpRowP2">
+				<label class="btcp-col">
+					<select id="btP2Set" class="select-field obs28">
+						<option value="unassigned">Balls</option>
+						<option value="solids">Solids</option>
+						<option value="stripes">Stripes</option>
+					</select>
+				</label>
+				<div class="btcp-rack-wrap">
+					<div id="btCpP2Rack" class="btcp-rack noShow"></div>
+					<div id="btCpP2MidRack" class="btcp-rack btcp-rack--mid noShow"></div>
+					<div id="btCpP2FullRack" class="btcp-rack btcp-rack--full noShow"></div>
+				</div>
 			</div>
 
 			<div class="input-row" style="display: flex; align-items: center; gap: 2px;">
@@ -91,16 +121,17 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 			</div>
 
 			<div class="grid-section grid-cols-1" id="updateInfoRowFull">
-				<div class="btn btn--primary hover obs28" id="sendPNames" onclick="postNames()">Update Info</div>
+				<div class="btn btn--primary hover obs28" id="sendPNames" onclick="postNames()">Update Player Info on Overlay</div>
 			</div>
 
 			<div class="grid-section noShow" id="updateInfoRowBallTracking" style="grid-template-columns: 120px 1fr; gap: var(--grid-gap);">
-				<div class="grid-section" style="grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
+				<div class="grid-section" id="btGameGrid" style="grid-template-columns: 1fr 1fr; gap: 4px;">
 					<div class="btn btn--sm hover obs28" id="btGameEight" type="button">8</div>
 					<div class="btn btn--sm hover obs28" id="btGameNine" type="button">9</div>
 					<div class="btn btn--sm hover obs28" id="btGameTen" type="button">10</div>
+					<div class="btn btn--sm hover obs28" id="btResetBalls" type="button">Reset</div>
 				</div>
-				<div class="btn btn--primary hover obs28" id="sendPNamesBt" onclick="postNames()">Update Info</div>
+				<div class="btn btn--primary hover obs28" id="sendPNamesBt" onclick="postNames()">Update Player Info on Overlay</div>
 			</div>
 		</section>
 
@@ -146,33 +177,6 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 				<div class="btn btn--sm hover obs28" id="swapBtn" onclick="swapColors()">Swap</div>
 			</div>
 		</section>
-
-		<section class="section-card noShow" id="ballTrackerSection">
-			<div class="section-card__title">Ball Tracker</div>
-			<div class="grid-section" style="grid-template-columns: 1fr 1fr auto; gap: var(--grid-gap);">
-				<div class="input-group">
-					<label>P1 Set:</label>
-					<select id="btP1Set" class="select-field obs28">
-						<option value="unassigned">Unassigned</option>
-						<option value="solids">Solids</option>
-						<option value="stripes">Stripes</option>
-					</select>
-				</div>
-				<div class="input-group">
-					<label>P2 Set:</label>
-					<select id="btP2Set" class="select-field obs28">
-						<option value="unassigned">Unassigned</option>
-						<option value="solids">Solids</option>
-						<option value="stripes">Stripes</option>
-					</select>
-				</div>
-				<div class="btn btn--sm hover obs28" id="btSwapSets" type="button" style="align-self:end;">Swap</div>
-			</div>
-			<div class="grid-section grid-cols-1">
-				<div class="btn hover obs28" id="btResetBalls" type="button">Reset</div>
-			</div>
-		</section>
-
 
 		<!-- Section: Scoring -->
 		<section class="section-card">

@@ -4,6 +4,11 @@
   const STORAGE_ENABLED_KEY = 'ballTrackingEnabled';
   const STORAGE_STATE_KEY = 'ballTrackerState';
 
+  const SOLIDS = ['1','2','3','4','5','6','7'];
+  const STRIPES = ['9','10','11','12','13','14','15'];
+  const NINE_BALL = ['1','2','3','4','5','6','7','8','9'];
+  const TEN_BALL = ['1','2','3','4','5','6','7','8','9','10'];
+
   const DEFAULTS = {
     enabled: true,
     gameType: 'eight',
@@ -75,7 +80,6 @@
   function applyUiEnabled(enabled) {
     setVisible('updateInfoRowFull', !enabled);
     setVisible('updateInfoRowBallTracking', enabled);
-    setVisible('ballTrackerSection', enabled);
   }
 
   function setActiveGameButtons(gameType) {
@@ -113,6 +117,121 @@
     for (let i = 1; i <= 15; i++) state.pocketed[String(i)] = false;
   }
 
+  function getEffectiveSetForPlayer(state, player) {
+    const assignments = state.assignments || { p1Set: 'unassigned', p2Set: 'unassigned' };
+    const defaults = state.defaults || { p1Default: 'solids' };
+
+    if (player === 1) {
+      if (assignments.p1Set && assignments.p1Set !== 'unassigned') return assignments.p1Set;
+      return defaults.p1Default === 'stripes' ? 'stripes' : 'solids';
+    }
+
+    if (assignments.p2Set && assignments.p2Set !== 'unassigned') return assignments.p2Set;
+    const p1Default = defaults.p1Default === 'stripes' ? 'stripes' : 'solids';
+    return p1Default === 'solids' ? 'stripes' : 'solids';
+  }
+
+  function setCpVisible(id, visible) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (visible) el.classList.remove('noShow');
+    else el.classList.add('noShow');
+  }
+
+  function clearCpRack(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+  }
+
+  function togglePocketed(ball) {
+    const st = loadState();
+    st.pocketed = st.pocketed || {};
+    const key = String(ball);
+    st.pocketed[key] = !st.pocketed[key];
+    saveState(st);
+    broadcastState(st);
+    renderControlPanelRacks(st);
+  }
+
+  function renderCpRack(id, ballNumbers, state, options) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const pocketed = state.pocketed || {};
+
+    clearCpRack(id);
+
+    for (const n of ballNumbers) {
+      const img = document.createElement('img');
+      img.className = 'btcp-ball';
+      img.alt = n;
+      img.src = `./PCLS-Balls/images/render0/${n}.png`;
+
+      const isPocketed = !!pocketed[String(n)];
+      if (options && options.placeholder) img.classList.add('btcp-ball--placeholder');
+      if (isPocketed) img.classList.add('btcp-ball--pocketed');
+
+      img.addEventListener('click', () => togglePocketed(n));
+      el.appendChild(img);
+    }
+  }
+
+  function renderControlPanelRacks(state) {
+    const enabled = !!state.enabled;
+    const gameType = state.gameType || 'eight';
+
+    setCpVisible('btCpRowP1', enabled);
+    setCpVisible('btCpRowP2', enabled);
+
+    if (!enabled) {
+      clearCpRack('btCpP1Rack');
+      clearCpRack('btCpP1MidRack');
+      clearCpRack('btCpP1FullRack');
+      clearCpRack('btCpP2Rack');
+      clearCpRack('btCpP2MidRack');
+      clearCpRack('btCpP2FullRack');
+      return;
+    }
+
+    const isNine = gameType === 'nine';
+    const isTen = gameType === 'ten';
+    const isEight = !isNine && !isTen;
+
+    // Set selectors are relevant only for 8-ball
+    const p1SetEl = document.getElementById('btP1Set');
+    const p2SetEl = document.getElementById('btP2Set');
+    if (p1SetEl) p1SetEl.classList.toggle('noShow', !isEight);
+    if (p2SetEl) p2SetEl.classList.toggle('noShow', !isEight);
+
+    setCpVisible('btCpP1Rack', isEight);
+    setCpVisible('btCpP2Rack', isEight);
+    setCpVisible('btCpP1MidRack', isEight);
+    setCpVisible('btCpP2MidRack', isEight);
+    setCpVisible('btCpP1FullRack', !isEight);
+    setCpVisible('btCpP2FullRack', !isEight);
+
+    if (isNine || isTen) {
+      const balls = isNine ? NINE_BALL : TEN_BALL;
+      renderCpRack('btCpP1FullRack', balls, state, { placeholder: false });
+      renderCpRack('btCpP2FullRack', balls, state, { placeholder: false });
+      return;
+    }
+
+    const p1Set = getEffectiveSetForPlayer(state, 1);
+    const p2Set = getEffectiveSetForPlayer(state, 2);
+
+    const p1Balls = p1Set === 'stripes' ? STRIPES : SOLIDS;
+    const p2Balls = p2Set === 'stripes' ? STRIPES : SOLIDS;
+
+    const placeholderP1 = !state.assignments || state.assignments.p1Set === 'unassigned';
+    const placeholderP2 = !state.assignments || state.assignments.p2Set === 'unassigned';
+
+    renderCpRack('btCpP1Rack', p1Balls, state, { placeholder: placeholderP1 });
+    renderCpRack('btCpP2Rack', p2Balls, state, { placeholder: placeholderP2 });
+    renderCpRack('btCpP1MidRack', ['8'], state, { placeholder: false });
+    renderCpRack('btCpP2MidRack', ['8'], state, { placeholder: false });
+  }
+
   function flipDefaults(state) {
     state.defaults = state.defaults || { p1Default: 'solids' };
     state.defaults.p1Default = (state.defaults.p1Default === 'stripes') ? 'solids' : 'stripes';
@@ -143,6 +262,8 @@
       broadcastDisabled();
     }
 
+    renderControlPanelRacks(state);
+
     // Bind enable toggle
     if (enabledCheckbox) {
       enabledCheckbox.addEventListener('change', () => {
@@ -161,8 +282,10 @@
           }
           saveState(st);
           broadcastState(st);
+          renderControlPanelRacks(st);
         } else {
           broadcastDisabled();
+          renderControlPanelRacks(st);
         }
       });
     }
@@ -185,6 +308,7 @@
       saveState(st);
       setActiveGameButtons(gameType);
       broadcastState(st);
+      renderControlPanelRacks(st);
     }
 
     if (btnEight) btnEight.addEventListener('click', () => onGameSelect('eight'));
@@ -200,12 +324,30 @@
       const p1 = st.assignments.p1Set;
       const p2 = st.assignments.p2Set;
 
-      // Auto-assign opposite when one is chosen
-      if (changedPlayer === 1 && (p1 === 'solids' || p1 === 'stripes')) {
-        st.assignments.p2Set = (p1 === 'solids') ? 'stripes' : 'solids';
+      if (changedPlayer === 1) {
+        if (p1 === 'unassigned') {
+          st.assignments.p2Set = 'unassigned';
+        } else if (p1 === 'solids') {
+          st.assignments.p2Set = 'stripes';
+        } else if (p1 === 'stripes') {
+          st.assignments.p2Set = 'solids';
+        }
       }
-      if (changedPlayer === 2 && (p2 === 'solids' || p2 === 'stripes')) {
-        st.assignments.p1Set = (p2 === 'solids') ? 'stripes' : 'solids';
+
+      if (changedPlayer === 2) {
+        if (p2 === 'unassigned') {
+          st.assignments.p1Set = 'unassigned';
+        } else if (p2 === 'solids') {
+          st.assignments.p1Set = 'stripes';
+        } else if (p2 === 'stripes') {
+          st.assignments.p1Set = 'solids';
+        }
+      }
+
+      // Paired "Balls" behavior: if either is unassigned after adjustments, force both unassigned.
+      if (st.assignments.p1Set === 'unassigned' || st.assignments.p2Set === 'unassigned') {
+        st.assignments.p1Set = 'unassigned';
+        st.assignments.p2Set = 'unassigned';
       }
 
       // Prevent invalid state
@@ -218,6 +360,7 @@
       if (p1Sel) p1Sel.value = st.assignments.p1Set;
       if (p2Sel) p2Sel.value = st.assignments.p2Set;
       broadcastState(st);
+      renderControlPanelRacks(st);
     }
 
     if (p1Sel) {
@@ -242,23 +385,6 @@
       });
     }
 
-    // Swap
-    const swapBtn = document.getElementById('btSwapSets');
-    if (swapBtn) {
-      swapBtn.addEventListener('click', () => {
-        const st = loadState();
-        if ((st.assignments.p1Set === 'unassigned') && (st.assignments.p2Set === 'unassigned')) {
-          flipDefaults(st);
-        } else {
-          swapAssignments(st);
-        }
-        saveState(st);
-        if (p1Sel) p1Sel.value = st.assignments.p1Set;
-        if (p2Sel) p2Sel.value = st.assignments.p2Set;
-        broadcastState(st);
-      });
-    }
-
     // Reset
     const resetBtn = document.getElementById('btResetBalls');
     if (resetBtn) {
@@ -267,6 +393,7 @@
         resetPocketed(s);
         saveState(s);
         broadcastState(s);
+        renderControlPanelRacks(s);
       });
     }
   }

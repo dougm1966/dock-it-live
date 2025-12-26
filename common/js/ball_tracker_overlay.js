@@ -54,7 +54,7 @@
     const nameEl = document.getElementById('player1Name');
     const namePxRaw = nameEl ? Number.parseFloat(window.getComputedStyle(nameEl).fontSize) : NaN;
     const namePx = Number.isFinite(namePxRaw) ? namePxRaw : 15;
-    const multiplier = (gameType === 'nine' || gameType === 'ten') ? 1.2 : 1.52;
+    const multiplier = 1.52;
     const px = clamp(Math.round(namePx * multiplier), 12, 26);
     document.documentElement.style.setProperty('--bt-ball-size', `${px}px`);
   }

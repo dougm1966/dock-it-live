@@ -7,6 +7,29 @@ const ADS_CHANNEL_MAIN = 'g4-main';
 const ADS_CONFIG_KEY = 'adLayoutConfig_v1';
 const adsBc = new BroadcastChannel(ADS_CHANNEL_MAIN);
 
+let adsFrameBgLivePending = false;
+let adsFrameBgLiveLatest = { color: '#ffffff', alpha: 50 };
+
+function adsModalPreventDefault(e) {
+	if (!e) return;
+	e.preventDefault();
+}
+
+function adsModalPreventScrollKeys(e) {
+	if (!e) return;
+	const keys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Spacebar'];
+	if (keys.includes(e.key)) {
+		e.preventDefault();
+	}
+}
+
+let adsFrameBgModalState = {
+	h: 270,
+	s: 1,
+	v: 1,
+	a: 50
+};
+
 function adsSafeParseJson(value, fallback) {
 	try {
 		if (!value) return fallback;
@@ -16,11 +39,213 @@ function adsSafeParseJson(value, fallback) {
 	}
 }
 
+function adsOpenFrameBgModal() {
+	const modal = document.getElementById('adsFrameBgModal');
+	if (!modal) return;
+
+	document.body.classList.add('ads-modal-open');
+	if (!modal.dataset.scrollLockAttached) {
+		modal.addEventListener('wheel', adsModalPreventDefault, { passive: false });
+		modal.addEventListener('touchmove', adsModalPreventDefault, { passive: false });
+		modal.dataset.scrollLockAttached = '1';
+	}
+	window.addEventListener('keydown', adsModalPreventScrollKeys, { passive: false });
+
+	const cfg = adsLoadConfig();
+	const hex = adsNormalizeHexColor(cfg.frameBgColor, '#ffffff');
+	const alphaVal = adsClampInt(cfg.frameBgAlpha, 0, 100, 50);
+	const { r, g, b } = adsHexToRgb(hex);
+	const hsv = adsRgbToHsv(r, g, b);
+	adsFrameBgModalState = {
+		h: hsv.h,
+		s: hsv.s,
+		v: hsv.v,
+		a: alphaVal
+	};
+
+	const hueEl = document.getElementById('adsColorHue');
+	if (hueEl) hueEl.value = String(Math.round(adsFrameBgModalState.h));
+	const alphaEl = document.getElementById('adsColorAlpha');
+	if (alphaEl) alphaEl.value = String(adsFrameBgModalState.a);
+	const alphaLabel = document.getElementById('adsColorAlphaLabel');
+	if (alphaLabel) alphaLabel.textContent = `${adsFrameBgModalState.a}%`;
+
+	modal.classList.remove('noShow');
+	requestAnimationFrame(() => {
+		adsColorModalRenderSv();
+		adsColorModalUpdateThumb();
+		adsColorModalUpdatePreview();
+		adsPreviewFrameBgFromModal();
+	});
+	window.addEventListener('keydown', adsFrameBgModalKeyHandler);
+}
+
+function adsCloseFrameBgModal(fromBackdrop) {
+	const modal = document.getElementById('adsFrameBgModal');
+	if (!modal) return;
+	modal.classList.add('noShow');
+	document.body.classList.remove('ads-modal-open');
+	window.removeEventListener('keydown', adsModalPreventScrollKeys);
+	window.removeEventListener('keydown', adsFrameBgModalKeyHandler);
+}
+
+function adsFrameBgModalKeyHandler(e) {
+	if (!e) return;
+	if (e.key === 'Escape') {
+		adsCloseFrameBgModal(false);
+	}
+}
+
+function adsColorModalSetHue(value) {
+	adsFrameBgModalState.h = adsClampInt(value, 0, 360, 270);
+	adsColorModalRenderSv();
+	adsColorModalUpdatePreview();
+	adsPreviewFrameBgFromModal();
+}
+
+function adsColorModalSetAlpha(value) {
+	adsFrameBgModalState.a = adsClampInt(value, 0, 100, 50);
+	const alphaLabel = document.getElementById('adsColorAlphaLabel');
+	if (alphaLabel) alphaLabel.textContent = `${adsFrameBgModalState.a}%`;
+	adsColorModalUpdatePreview();
+	adsPreviewFrameBgFromModal();
+}
+
+function adsBroadcastFrameBg(color, alpha, colorOnly = false) {
+	try {
+		adsBc.postMessage({ ads: 'frameBg', frameBgColor: color, frameBgAlpha: alpha, colorOnly });
+	} catch {
+		// ignore
+	}
+}
+
+function adsUpdateFrameBgSummary(color, alpha) {
+	const bgSummary = document.getElementById('adsFrameBgSummary');
+	if (bgSummary) bgSummary.textContent = `${color} ${alpha}%`;
+}
+
+function adsPreviewFrameBgFromModal() {
+	const { r, g, b } = adsHsvToRgb(adsFrameBgModalState.h, adsFrameBgModalState.s, adsFrameBgModalState.v);
+	const hex = adsRgbToHex(r, g, b);
+	const alphaVal = adsClampInt(adsFrameBgModalState.a, 0, 100, 50);
+
+	adsFrameBgLiveLatest = { color: hex, alpha: alphaVal };
+	if (adsFrameBgLivePending) return;
+	adsFrameBgLivePending = true;
+	requestAnimationFrame(() => {
+		adsFrameBgLivePending = false;
+		const { color, alpha } = adsFrameBgLiveLatest;
+		// Persist without triggering ad preview refresh
+		const cfg = adsLoadConfig();
+		cfg.frameBgColor = adsNormalizeHexColor(color, '#ffffff');
+		cfg.frameBgAlpha = adsClampInt(alpha, 0, 100, 50);
+		cfg.frameBgAlphaMode = 'transparency_v2';
+		adsSaveConfig(cfg);
+		adsSyncEditor(cfg);
+		adsUpdateFrameBgSummary(cfg.frameBgColor, cfg.frameBgAlpha);
+		// Broadcast with colorOnly flag to prevent full re-render
+		adsBroadcastFrameBg(cfg.frameBgColor, cfg.frameBgAlpha, true);
+	});
+}
+
+function adsColorModalGetSvCanvas() {
+	const canvas = document.getElementById('adsColorSv');
+	if (!(canvas instanceof HTMLCanvasElement)) return null;
+	return canvas;
+}
+
+function adsColorModalRenderSv() {
+	const canvas = adsColorModalGetSvCanvas();
+	if (!canvas) return;
+	const ctx = canvas.getContext('2d');
+	if (!ctx) return;
+
+	const w = canvas.width;
+	const h = canvas.height;
+	const { r, g, b } = adsHsvToRgb(adsFrameBgModalState.h, 1, 1);
+
+	ctx.clearRect(0, 0, w, h);
+
+	const gradX = ctx.createLinearGradient(0, 0, w, 0);
+	gradX.addColorStop(0, 'rgba(255,255,255,1)');
+	gradX.addColorStop(1, `rgba(${r},${g},${b},1)`);
+	ctx.fillStyle = gradX;
+	ctx.fillRect(0, 0, w, h);
+
+	const gradY = ctx.createLinearGradient(0, 0, 0, h);
+	gradY.addColorStop(0, 'rgba(0,0,0,0)');
+	gradY.addColorStop(1, 'rgba(0,0,0,1)');
+	ctx.fillStyle = gradY;
+	ctx.fillRect(0, 0, w, h);
+}
+
+function adsColorModalUpdateThumb() {
+	const canvas = adsColorModalGetSvCanvas();
+	const thumb = document.getElementById('adsColorSvThumb');
+	if (!canvas || !thumb) return;
+
+	const rect = canvas.getBoundingClientRect();
+	const x = adsFrameBgModalState.s * rect.width;
+	const y = (1 - adsFrameBgModalState.v) * rect.height;
+	thumb.style.left = `${x}px`;
+	thumb.style.top = `${y}px`;
+}
+
+function adsColorModalUpdatePreview() {
+	return;
+}
+
+function adsColorModalSetSvFromEvent(e) {
+	const canvas = adsColorModalGetSvCanvas();
+	if (!canvas || !e) return;
+	const rect = canvas.getBoundingClientRect();
+	const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+	const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+	adsFrameBgModalState.s = rect.width <= 0 ? 0 : x / rect.width;
+	adsFrameBgModalState.v = rect.height <= 0 ? 0 : 1 - (y / rect.height);
+	adsColorModalUpdateThumb();
+	adsColorModalUpdatePreview();
+	adsPreviewFrameBgFromModal();
+}
+
+function adsInitFrameBgModal() {
+	const canvas = adsColorModalGetSvCanvas();
+	if (!canvas) return;
+
+	let dragging = false;
+	canvas.addEventListener('mousedown', (e) => {
+		dragging = true;
+		adsColorModalSetSvFromEvent(e);
+	});
+	window.addEventListener('mousemove', (e) => {
+		if (!dragging) return;
+		adsColorModalSetSvFromEvent(e);
+	});
+	window.addEventListener('mouseup', () => {
+		dragging = false;
+	});
+
+	canvas.addEventListener('touchstart', (e) => {
+		if (!e.touches || !e.touches[0]) return;
+		dragging = true;
+		adsColorModalSetSvFromEvent(e.touches[0]);
+	});
+	window.addEventListener('touchmove', (e) => {
+		if (!dragging) return;
+		if (!e.touches || !e.touches[0]) return;
+		adsColorModalSetSvFromEvent(e.touches[0]);
+	});
+	window.addEventListener('touchend', () => {
+		dragging = false;
+	});
+}
+
 function adsGetDefaultConfig() {
 	return {
 		showFrameArt: false,
-		frameBgColor: '#000000',
-		frameBgAlpha: 0,
+		frameBgColor: '#ffffff',
+		frameBgAlpha: 50,
+		frameBgAlphaMode: 'transparency_v2',
 		top: [
 			{ key: 'ad_top_1', startCol: 1, colSpan: 1 },
 			{ key: 'ad_top_2', startCol: 2, colSpan: 1 },
@@ -61,27 +286,120 @@ function adsNormalizeHexColor(value, fallback) {
 	return fallback;
 }
 
+function adsHexToRgb(hex) {
+	const h = adsNormalizeHexColor(hex, '#ffffff');
+	const r = parseInt(h.slice(1, 3), 16);
+	const g = parseInt(h.slice(3, 5), 16);
+	const b = parseInt(h.slice(5, 7), 16);
+	return { r, g, b };
+}
+
+function adsRgbToHex(r, g, b) {
+	const toHex = (n) => {
+		const v = Math.max(0, Math.min(255, Math.round(n)));
+		return v.toString(16).padStart(2, '0');
+	};
+	return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function adsHsvToRgb(h, s, v) {
+	const hh = ((Number(h) % 360) + 360) % 360;
+	const ss = Math.max(0, Math.min(1, Number(s)));
+	const vv = Math.max(0, Math.min(1, Number(v)));
+	const c = vv * ss;
+	const x = c * (1 - Math.abs(((hh / 60) % 2) - 1));
+	const m = vv - c;
+	let r1 = 0;
+	let g1 = 0;
+	let b1 = 0;
+	if (hh < 60) {
+		r1 = c; g1 = x; b1 = 0;
+	} else if (hh < 120) {
+		r1 = x; g1 = c; b1 = 0;
+	} else if (hh < 180) {
+		r1 = 0; g1 = c; b1 = x;
+	} else if (hh < 240) {
+		r1 = 0; g1 = x; b1 = c;
+	} else if (hh < 300) {
+		r1 = x; g1 = 0; b1 = c;
+	} else {
+		r1 = c; g1 = 0; b1 = x;
+	}
+	return {
+		r: Math.round((r1 + m) * 255),
+		g: Math.round((g1 + m) * 255),
+		b: Math.round((b1 + m) * 255)
+	};
+}
+
+function adsRgbToHsv(r, g, b) {
+	const rr = Math.max(0, Math.min(255, Number(r))) / 255;
+	const gg = Math.max(0, Math.min(255, Number(g))) / 255;
+	const bb = Math.max(0, Math.min(255, Number(b))) / 255;
+	const max = Math.max(rr, gg, bb);
+	const min = Math.min(rr, gg, bb);
+	const d = max - min;
+	let h = 0;
+	if (d === 0) h = 0;
+	else if (max === rr) h = 60 * (((gg - bb) / d) % 6);
+	else if (max === gg) h = 60 * (((bb - rr) / d) + 2);
+	else h = 60 * (((rr - gg) / d) + 4);
+	if (h < 0) h += 360;
+	const s = max === 0 ? 0 : d / max;
+	const v = max;
+	return { h, s, v };
+}
+
 function adsSetFrameBgColor(color) {
 	const cfg = adsLoadConfig();
-	cfg.frameBgColor = adsNormalizeHexColor(color, '#000000');
+	cfg.frameBgColor = adsNormalizeHexColor(color, '#ffffff');
 	adsSaveConfig(cfg);
 	adsSyncEditor(cfg);
-	adsRefresh();
+	adsUpdateFrameBgSummary(cfg.frameBgColor, cfg.frameBgAlpha);
+	adsBroadcastFrameBg(cfg.frameBgColor, cfg.frameBgAlpha);
 }
 
 function adsSetFrameBgAlpha(value) {
 	const cfg = adsLoadConfig();
-	const alphaVal = adsClampInt(value, 0, 100, 0);
-	cfg.frameBgAlpha = alphaVal;
+	const transparencyVal = adsClampInt(value, 0, 100, 50);
+	cfg.frameBgAlpha = transparencyVal;
+	cfg.frameBgAlphaMode = 'transparency_v2';
 	adsSaveConfig(cfg);
 	adsSyncEditor(cfg);
-	const bgAlphaLabel = document.getElementById('adsFrameBgAlphaLabel');
-	if (bgAlphaLabel) bgAlphaLabel.textContent = `${alphaVal}%`;
-	adsRefresh();
+	adsUpdateFrameBgSummary(cfg.frameBgColor, cfg.frameBgAlpha);
+	adsBroadcastFrameBg(cfg.frameBgColor, cfg.frameBgAlpha);
+}
+
+function adsSetFrameBgSettings(color, alpha) {
+	const cfg = adsLoadConfig();
+	cfg.frameBgColor = adsNormalizeHexColor(color, '#ffffff');
+	cfg.frameBgAlpha = adsClampInt(alpha, 0, 100, 50);
+	cfg.frameBgAlphaMode = 'transparency_v2';
+	adsSaveConfig(cfg);
+	adsApplyConfigToBasicControls(cfg);
+	adsSyncEditor(cfg);
+	adsBroadcastFrameBg(cfg.frameBgColor, cfg.frameBgAlpha);
 }
 
 function adsLoadConfig() {
-	return adsSafeParseJson(localStorage.getItem(ADS_CONFIG_KEY), adsGetDefaultConfig());
+	const def = adsGetDefaultConfig();
+	const raw = adsSafeParseJson(localStorage.getItem(ADS_CONFIG_KEY), null);
+	if (!raw || typeof raw !== 'object') return def;
+	const cfg = { ...def, ...raw };
+	if (!Array.isArray(raw.top)) cfg.top = def.top;
+	if (!Array.isArray(raw.left)) cfg.left = def.left;
+	if (!Array.isArray(raw.right)) cfg.right = def.right;
+	// One-time migration from old semantics (alpha=opacity) to new semantics (alpha=transparency)
+	if (raw.frameBgAlphaMode !== 'transparency_v2') {
+		const oldAlpha = adsClampInt(cfg.frameBgAlpha, 0, 100, def.frameBgAlpha);
+		cfg.frameBgAlpha = 100 - oldAlpha;
+		cfg.frameBgAlphaMode = 'transparency_v2';
+		if (!raw.frameBgColor || String(raw.frameBgColor).toLowerCase() === '#000000') {
+			cfg.frameBgColor = def.frameBgColor;
+		}
+		adsSaveConfig(cfg);
+	}
+	return cfg;
 }
 
 function adsSaveConfig(cfg) {
@@ -333,7 +651,9 @@ async function adsHydrateHasImageFlags(cfg) {
 function adsSetFrame(region, index, checked) {
 	const cfg = adsLoadConfig();
 	const p = adsEnsurePlacement(cfg, region, Number(index));
-	p.frame = !!checked;
+	delete p.frame;
+	delete p.framed;
+	delete p.frameArt;
 	adsNormalizePlacementPositions(cfg);
 	adsSaveConfig(cfg);
 	adsApplyConfigToBasicControls(cfg);
@@ -369,15 +689,12 @@ function adsApplyConfigToBasicControls(cfg) {
 	const frameArtChk = document.getElementById('adsFrameArtChk');
 	if (frameArtChk) frameArtChk.checked = !!cfg.showFrameArt;
 
-	const bgColor = document.getElementById('adsFrameBgColor');
-	if (bgColor) {
-		bgColor.value = adsNormalizeHexColor(cfg.frameBgColor, '#000000');
+	const bgSummary = document.getElementById('adsFrameBgSummary');
+	if (bgSummary) {
+		const hex = adsNormalizeHexColor(cfg.frameBgColor, '#ffffff');
+		const alphaVal = adsClampInt(cfg.frameBgAlpha, 0, 100, 50);
+		bgSummary.textContent = `${hex} ${alphaVal}%`;
 	}
-	const bgAlpha = document.getElementById('adsFrameBgAlpha');
-	const bgAlphaLabel = document.getElementById('adsFrameBgAlphaLabel');
-	const alphaVal = adsClampInt(cfg.frameBgAlpha, 0, 100, 0);
-	if (bgAlpha) bgAlpha.value = String(alphaVal);
-	if (bgAlphaLabel) bgAlphaLabel.textContent = `${alphaVal}%`;
 
 	function applyRow(region, idx) {
 		const p = adsEnsurePlacement(cfg, region, idx);
@@ -392,7 +709,10 @@ function adsApplyConfigToBasicControls(cfg) {
 			spanEl.value = spanVal;
 		}
 		const frameEl = document.getElementById(`${prefix}${idx}Frame`);
-		if (frameEl) frameEl.checked = !!(p.frame || p.framed || p.frameArt);
+		if (frameEl) {
+			frameEl.checked = false;
+			frameEl.disabled = true;
+		}
 		const showEl = document.getElementById(`${prefix}${idx}Show`);
 		if (showEl) showEl.checked = !(p.show === false || p.enabled === false || p.hidden === true);
 		const titleEl = document.getElementById(`${prefix}${idx}Title`);
@@ -577,6 +897,17 @@ async function adsInit() {
 	adsNormalizePlacementPositions(cfg);
 	adsSaveConfig(cfg);
 	adsLoadIntoEditor();
-	adsApplyConfigToBasicControls(cfg);
+	try {
+		const frames = document.querySelectorAll('input[id$="Frame"]');
+		for (const el of frames) {
+			el.checked = false;
+			el.disabled = true;
+			const label = el.closest('label');
+			if (label) label.style.display = 'none';
+		}
+	} catch {
+		// ignore
+	}
+	adsInitFrameBgModal();
 	await adsRefreshPreviews();
 }

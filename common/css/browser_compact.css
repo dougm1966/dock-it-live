@@ -161,15 +161,7 @@ td {
 	background-image: linear-gradient(to left, grey, white);
 	position: fixed;
 	bottom: 11px;
-	width: 245px;
-	right: 670px;
-	border-radius: 0px 00px 10px 10px;
-	text-align: center;
-	padding-top: 2px;
-	padding-bottom: 1px;
-	font-size: 12pt;
-	font-weight: bolder;
-	border: 1px solid #000;
+	right: 10px;
 	z-index: 0;
 }
 

@@ -192,6 +192,10 @@ td {
 /* ===== Ball Tracker (8-ball under-name racks) ===== */
 :root {
 	--bt-ball-size: 18px;
+	--bt-rack-bg: rgba(255, 255, 255, 0.9);
+	--bt-rack-radius: calc((var(--bt-ball-size) / 2) + 4px);
+	--bt-rack-pad-x: 2px;
+	--bt-rack-pad-y: 2px;
 }
 
 .bt-rack {
@@ -200,13 +204,20 @@ td {
 	align-items: center;
 	gap: 2px;
 	margin-top: 0px;
-	padding: 4px 4px 0px;
-	width: 100%;
+	background: var(--bt-rack-bg);
+	border-radius: 0;
+	padding: 4px var(--bt-rack-pad-x) var(--bt-rack-pad-y);
+	width: fit-content;
+	max-width: 100%;
 	box-sizing: border-box;
 }
 
 .bt-rack--mid {
 	justify-content: center;
+	border-radius: 0;
+	padding-left: 0;
+	padding-right: 0;
+	width: 100%;
 }
 
 .bt-ball {
@@ -234,11 +245,17 @@ tr.bt-row td.bt-cell--mid {
 }
 
 tr.bt-row td.bt-cell:first-child .bt-rack {
-	justify-content: flex-start;
+	justify-content: flex-end;
+	margin-left: auto;
+	border-radius: var(--bt-rack-radius) 0 0 var(--bt-rack-radius);
+	padding-right: 0;
 }
 
 tr.bt-row td.bt-cell:last-child .bt-rack {
-	justify-content: flex-end;
+	justify-content: flex-start;
+	margin-right: auto;
+	border-radius: 0 var(--bt-rack-radius) var(--bt-rack-radius) 0;
+	padding-left: 0;
 }
 
 /* ===== Name centering with dynamic padding (no layout model changes) ===== */
@@ -475,7 +492,12 @@ tr.bt-row td.bt-cell:last-child .bt-rack {
 	font-weight: bolder;
 	border: 1px solid #000;
 	border-bottom: none;
+	color: #000;
 	z-index: 1;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+	transform: translateZ(0);
+	backface-visibility: hidden;
 }
 
 #raceInfo {
@@ -492,12 +514,17 @@ tr.bt-full-row td.bt-cell {
 	border: none;
 	background: transparent;
 	padding: 0;
+	text-align: center;
 }
 
 .bt-rack--full {
 	justify-content: center;
 	flex-wrap: nowrap;
 	gap: 2px;
+	border-radius: var(--bt-rack-radius);
+	width: fit-content;
+	margin: 0 auto;
+	max-width: 100%;
 }
 
 /* ===== Shot Clock Progress Bar ===== */
