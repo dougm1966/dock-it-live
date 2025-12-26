@@ -86,7 +86,7 @@ for more information about Salotto please visit https://salotto.app
 		<!-- Section: Player Colors -->
 		<!-- CRITICAL: p1colorDiv and p2colorDiv MUST be the first two <select> elements -->
 		<!-- JavaScript uses getElementsByTagName("select")[0] and [1] -->
-		<section class="section-card">
+		<section class="section-card" id="playerColorsSection">
 			<div class="grid-section" style="grid-template-columns: 1fr 1fr auto; gap: var(--grid-gap);">
 				<select id="p1colorDiv" class="select-field obs28" name="p1Colors" onchange="playerColorChange(1)">
 					<option value="" default>P1 Color</option>
@@ -190,6 +190,22 @@ for more information about Salotto please visit https://salotto.app
 					<span>Use Clock</span>
 				</label>
 				<label class="checkbox-label">
+					<input type="checkbox" class="smallSize" id="showSponsorLogosSetting" onchange="sponsorLogosSetting()">
+					<span>Sponsor Logos</span>
+				</label>
+				<label class="checkbox-label">
+					<input type="checkbox" class="smallSize" id="showAppearanceSetting" onchange="appearanceSetting()">
+					<span>Appearance</span>
+				</label>
+				<label class="checkbox-label">
+					<input type="checkbox" class="smallSize" id="showLogoUploadsSetting" onchange="logoUploadsSetting()">
+					<span>Logo Uploads</span>
+				</label>
+				<label class="checkbox-label">
+					<input type="checkbox" class="smallSize" id="showPlayerColorsSetting" onchange="playerColorsSetting()">
+					<span>Player Colors</span>
+				</label>
+				<label class="checkbox-label">
 					<input type="checkbox" class="smallSize" id="showLeftSponsorLogoSetting" onchange="leftSponsorLogoSetting()">
 					<span class="hover" onclick="leftSponsorLabelChange()" id="leftSponsorLabel">Custom</span> Logo
 				</label>
@@ -201,7 +217,7 @@ for more information about Salotto please visit https://salotto.app
 		</section>
 
 		<!-- Section: Logo Uploads -->
-		<section class="section-card">
+		<section class="section-card" id="logoUploadsSection">
 			<div class="section-card__title" id="settingsBox3">Logo Upload (Max: 2.4MB)</div>
 			<div class="grid-section grid-cols-2">
 				<div class="logo-upload-btn hover obs28" id="settingsBox4">
@@ -220,7 +236,7 @@ for more information about Salotto please visit https://salotto.app
 		</section>
 
 		<!-- Section: Sponsor Logos -->
-		<section class="section-card" id="logoSlideShowDiv">
+		<section class="section-card" id="sponsorLogosSection">
 			<div class="checkbox-row">
 				<label class="checkbox-label">
 					<input type="checkbox" class="smallSize" id="logoSlideshowChk" onchange="logoSlideshow()">
@@ -247,7 +263,7 @@ for more information about Salotto please visit https://salotto.app
 		</section>
 
 		<!-- Section: Appearance -->
-		<section class="section-card">
+		<section class="section-card" id="appearanceSection">
 			<div class="section-card__title">Appearance</div>
 
 			<div class="slider-row">

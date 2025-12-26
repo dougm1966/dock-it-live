@@ -219,7 +219,51 @@ var clockIsPaused = false;
 				}
 			}
 
-			function clockSetting() {
+			function playerColorsSetting() {
+		if (!document.getElementById("showPlayerColorsSetting").checked) {
+			localStorage.setItem("showPlayerColors", "no");
+			document.getElementById("playerColorsSection").classList.add("noShow");
+		} else {
+			localStorage.setItem("showPlayerColors", "yes");
+			document.getElementById("playerColorsSection").classList.remove("noShow");
+		}
+		updateAllCheckbox();
+	}
+
+	function logoUploadsSetting() {
+		if (!document.getElementById("showLogoUploadsSetting").checked) {
+			localStorage.setItem("showLogoUploads", "no");
+			document.getElementById("logoUploadsSection").classList.add("noShow");
+		} else {
+			localStorage.setItem("showLogoUploads", "yes");
+			document.getElementById("logoUploadsSection").classList.remove("noShow");
+		}
+		updateAllCheckbox();
+	}
+
+	function appearanceSetting() {
+		if (!document.getElementById("showAppearanceSetting").checked) {
+			localStorage.setItem("showAppearance", "no");
+			document.getElementById("appearanceSection").classList.add("noShow");
+		} else {
+			localStorage.setItem("showAppearance", "yes");
+			document.getElementById("appearanceSection").classList.remove("noShow");
+		}
+		updateAllCheckbox();
+	}
+
+	function sponsorLogosSetting() {
+		if (!document.getElementById("showSponsorLogosSetting").checked) {
+			localStorage.setItem("showSponsorLogos", "no");
+			document.getElementById("sponsorLogosSection").classList.add("noShow");
+		} else {
+			localStorage.setItem("showSponsorLogos", "yes");
+			document.getElementById("sponsorLogosSection").classList.remove("noShow");
+		}
+		updateAllCheckbox();
+	}
+
+	function clockSetting() {
 				if (!document.getElementById("useClockSetting").checked) {
 						localStorage.setItem("useClock", "no");
 						bc.postMessage({clockDisplay:'noClock'});
@@ -243,7 +287,11 @@ var clockIsPaused = false;
 			function updateAllCheckbox() {
 				var allChecked = (localStorage.getItem("showRightSponsorLogo") == "yes" &&
 				                  localStorage.getItem("useClock") == "yes" &&
-				                  localStorage.getItem("showLeftSponsorLogo") == "yes");
+				                  localStorage.getItem("showLeftSponsorLogo") == "yes" &&
+				                  localStorage.getItem("showSponsorLogos") == "yes" &&
+				                  localStorage.getItem("showAppearance") == "yes" &&
+				                  localStorage.getItem("showLogoUploads") == "yes" &&
+				                  localStorage.getItem("showPlayerColors") == "yes");
 				document.getElementById("allCheck").checked = allChecked;
 			}
 	
@@ -456,20 +504,40 @@ var clockIsPaused = false;
 
 			function allCheck() {
 				if (!document.getElementById("allCheck").checked) {
-				document.getElementById("useClockSetting").checked =  true; 
-				document.getElementById("showLeftSponsorLogoSetting").checked =  true; 
-				document.getElementById("showRightSponsorLogoSetting").checked =  true; 
+				// Check all sections
+				document.getElementById("useClockSetting").checked = true; 
+				document.getElementById("showLeftSponsorLogoSetting").checked = true; 
+				document.getElementById("showRightSponsorLogoSetting").checked = true; 
+				document.getElementById("showSponsorLogosSetting").checked = true;
+				document.getElementById("showAppearanceSetting").checked = true;
+				document.getElementById("showLogoUploadsSetting").checked = true;
+				document.getElementById("showPlayerColorsSetting").checked = true;
+				// Trigger all functions
 				document.getElementById("useClockSetting").click(); 
 				document.getElementById("showLeftSponsorLogoSetting").click(); 
 				document.getElementById("showRightSponsorLogoSetting").click(); 
+				document.getElementById("showSponsorLogosSetting").click();
+				document.getElementById("showAppearanceSetting").click();
+				document.getElementById("showLogoUploadsSetting").click();
+				document.getElementById("showPlayerColorsSetting").click();
 				} 
 				else { 
-				document.getElementById("useClockSetting").checked =  false; 
-				document.getElementById("showLeftSponsorLogoSetting").checked =  false; 
-				document.getElementById("showRightSponsorLogoSetting").checked =  false; 
+				// Uncheck all sections
+				document.getElementById("useClockSetting").checked = false; 
+				document.getElementById("showLeftSponsorLogoSetting").checked = false; 
+				document.getElementById("showRightSponsorLogoSetting").checked = false; 
+				document.getElementById("showSponsorLogosSetting").checked = false;
+				document.getElementById("showAppearanceSetting").checked = false;
+				document.getElementById("showLogoUploadsSetting").checked = false;
+				document.getElementById("showPlayerColorsSetting").checked = false;
+				// Trigger all functions
 				document.getElementById("useClockSetting").click(); 
 				document.getElementById("showLeftSponsorLogoSetting").click(); 
 				document.getElementById("showRightSponsorLogoSetting").click(); 
+				document.getElementById("showSponsorLogosSetting").click();
+				document.getElementById("showAppearanceSetting").click();
+				document.getElementById("showLogoUploadsSetting").click();
+				document.getElementById("showPlayerColorsSetting").click();
 				}				
 					
 			}			
