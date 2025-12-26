@@ -50,8 +50,8 @@ td {
 	border-radius: 4px 0px 0px 5px;
 	border-right: none;
 	color: #fff;
-	font-size: 9pt;
-	font-weight: 500;
+	font-size: 8.75pt;
+	font-weight: 300;
 	padding: 0;
 	z-index: 10;
 	/* Center text vertically within the icon */
@@ -73,8 +73,8 @@ td {
 	border-radius: 0px 4px 4px 0px;
 	border-left: none;
 	color: #fff;
-	font-size: 9pt;
-	font-weight: 500;
+	font-size: 8.75pt;
+	font-weight: 300;
 	padding: 0;
 	z-index: 10;
 	/* Center text vertically within the icon */

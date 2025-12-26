@@ -140,14 +140,14 @@ td {
 	background: green;
 	border: solid 1px #000;
 	color: #fff;
-	font-size: 9pt;
-	font-weight: 200; /* Much lighter weight for thinner "Ex" text */
+	font-size: 8.75pt;
+	font-weight: 300;
 	padding: 0;
 	z-index: 10;
 	/* Fill the cell height - fit within the border */
-	top: 0;
-	bottom: 0;
-	height: 100%; /* Exact fit within cell borders */
+	top: -1px;
+	bottom: -1px;
+	height: calc(100% + 2px); /* Extend 1px beyond content area on each side */
 	/* Center text vertically within the icon */
 	display: flex;
 	align-items: center;
