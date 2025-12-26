@@ -90,8 +90,17 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 				<input type="text" id="wagerInfoTxt" class="input-field" placeholder="">
 			</div>
 
-			<div class="grid-section grid-cols-1">
+			<div class="grid-section grid-cols-1" id="updateInfoRowFull">
 				<div class="btn btn--primary hover obs28" id="sendPNames" onclick="postNames()">Update Info</div>
+			</div>
+
+			<div class="grid-section noShow" id="updateInfoRowBallTracking" style="grid-template-columns: 120px 1fr; gap: var(--grid-gap);">
+				<div class="grid-section" style="grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
+					<div class="btn btn--sm hover obs28" id="btGameEight" type="button">8</div>
+					<div class="btn btn--sm hover obs28" id="btGameNine" type="button">9</div>
+					<div class="btn btn--sm hover obs28" id="btGameTen" type="button">10</div>
+				</div>
+				<div class="btn btn--primary hover obs28" id="sendPNamesBt" onclick="postNames()">Update Info</div>
 			</div>
 		</section>
 
@@ -135,6 +144,60 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 					<option value="white">White</option>
 				</select>
 				<div class="btn btn--sm hover obs28" id="swapBtn" onclick="swapColors()">Swap</div>
+			</div>
+		</section>
+
+		<section class="section-card noShow" id="ballTrackerSection">
+			<div class="section-card__title">Ball Tracker</div>
+			<div class="grid-section" style="grid-template-columns: 1fr 1fr auto; gap: var(--grid-gap);">
+				<div class="input-group">
+					<label>P1 Set:</label>
+					<select id="btP1Set" class="select-field obs28">
+						<option value="unassigned">Unassigned</option>
+						<option value="solids">Solids</option>
+						<option value="stripes">Stripes</option>
+					</select>
+				</div>
+				<div class="input-group">
+					<label>P2 Set:</label>
+					<select id="btP2Set" class="select-field obs28">
+						<option value="unassigned">Unassigned</option>
+						<option value="solids">Solids</option>
+						<option value="stripes">Stripes</option>
+					</select>
+				</div>
+				<div class="btn btn--sm hover obs28" id="btSwapSets" type="button" style="align-self:end;">Swap</div>
+			</div>
+			<div class="grid-section" style="grid-template-columns: 1fr 1fr 1fr; gap: var(--grid-gap);">
+				<div class="input-group">
+					<label>Ball Size:</label>
+					<select id="btBallSize" class="select-field obs28">
+						<option value="35">Small</option>
+						<option value="45">Medium</option>
+						<option value="55">Large</option>
+					</select>
+				</div>
+				<div class="btn hover obs28" id="btShowHide" type="button" style="align-self:end;">Hide</div>
+				<div class="btn hover obs28" id="btResetBalls" type="button" style="align-self:end;">Reset</div>
+			</div>
+			<div class="grid-section grid-cols-1">
+				<div class="grid-section" id="btBallToggleRow" style="grid-template-columns: repeat(15, 1fr); gap: 4px;">
+					<div class="btn btn--sm hover obs28" data-ball="1">1</div>
+					<div class="btn btn--sm hover obs28" data-ball="2">2</div>
+					<div class="btn btn--sm hover obs28" data-ball="3">3</div>
+					<div class="btn btn--sm hover obs28" data-ball="4">4</div>
+					<div class="btn btn--sm hover obs28" data-ball="5">5</div>
+					<div class="btn btn--sm hover obs28" data-ball="6">6</div>
+					<div class="btn btn--sm hover obs28" data-ball="7">7</div>
+					<div class="btn btn--sm hover obs28" data-ball="8">8</div>
+					<div class="btn btn--sm hover obs28" data-ball="9">9</div>
+					<div class="btn btn--sm hover obs28" data-ball="10">10</div>
+					<div class="btn btn--sm hover obs28" data-ball="11">11</div>
+					<div class="btn btn--sm hover obs28" data-ball="12">12</div>
+					<div class="btn btn--sm hover obs28" data-ball="13">13</div>
+					<div class="btn btn--sm hover obs28" data-ball="14">14</div>
+					<div class="btn btn--sm hover obs28" data-ball="15">15</div>
+				</div>
 			</div>
 		</section>
 
@@ -280,6 +343,7 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 
 	<!-- CRITICAL: This script MUST be at end of body -->
 	<script src="./common/js/control_panel_post.js"></script>
+	<script src="./common/js/ball_tracker_control_panel.js"></script>
 
 	<script>
 	//////////////////// HotKey scripts
@@ -334,6 +398,10 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 					<label class="checkbox-label">
 						<input type="checkbox" class="smallSize" id="allCheck" onchange="allCheck()" checked>
 						<span>All</span>
+					</label>
+					<label class="checkbox-label">
+						<input type="checkbox" class="smallSize" id="ballTrackingEnabledSetting">
+						<span>Ball Tracking</span>
 					</label>
 					<label class="checkbox-label">
 						<input type="checkbox" class="smallSize" id="useClockSetting" onchange="clockSetting()">

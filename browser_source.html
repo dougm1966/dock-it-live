@@ -46,16 +46,19 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 							<img id="player1-photo" class="playerPhoto" src="" alt="">
 							<img class="fadeOutElm bs-logo bs-logo-left" id="leftSponsorLogoImg" height="20" src="" alt="">
 							<span class="playerNameText">Player 1</span>
+							<div id="p1BallRack" class="bt-rack noShow"></div>
 						</td>
 						<td class="bs-score-cluster">
 							<span id="player1Score" class="bs-score-pill">0</span>
 							<span id="player2Score" class="bs-score-pill">0</span>
+							<div id="midBallRack" class="bt-rack bt-rack--mid noShow"></div>
 						</td>
 						<td id="player2Name" class="bs-player-name">
 							<span class="playerNameText">Player 2</span>
 							<img class="fadeOutElm bs-logo bs-logo-right" id="rightSponsorLogoImg" height="20" src="" alt="">
 							<img id="player2-photo" class="playerPhoto" src="" alt="">
 							<div class="fadeInElm bs-ext-icon" id="p2ExtIcon">Ex</div>
+							<div id="p2BallRack" class="bt-rack noShow"></div>
 						</td>
 					</tr>
 				</tbody>
@@ -79,5 +82,6 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 	<!-- Load bundled JavaScript -->
 	<script src="./common/js/idb_images.js"></script>
 	<script src="./common/js/browser_source.bundled.js"></script>
+	<script src="./common/js/ball_tracker_overlay.js"></script>
 </body>
 </html>

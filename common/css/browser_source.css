@@ -189,6 +189,39 @@ td {
 	overflow: hidden;
 }
 
+/* ===== Ball Tracker (8-ball under-name racks) ===== */
+:root {
+	--bt-ball-size: 18px;
+}
+
+.bt-rack {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 2px;
+	margin-top: 2px;
+	padding: 0 4px 2px;
+	box-sizing: border-box;
+}
+
+.bt-rack--mid {
+	justify-content: center;
+}
+
+.bt-ball {
+	width: var(--bt-ball-size);
+	height: var(--bt-ball-size);
+	display: inline-block;
+}
+
+.bt-ball--placeholder {
+	opacity: 0.25;
+}
+
+.bt-ball--pocketed {
+	opacity: 0.35;
+}
+
 /* ===== Name centering with dynamic padding (no layout model changes) ===== */
 /*
   We keep Ex/photo/sponsor logos absolutely positioned.
