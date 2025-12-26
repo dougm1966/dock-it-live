@@ -23,9 +23,6 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 			<!-- Shot Clock Progress Bar -->
 			<div class="shotclockvis fadeOutElm" id="shotClockVis"></div>
 
-			<!-- Shot Clock Display (separate from score table) -->
-			<div class="fadeOutElm" id="shotClock">&nbsp;</div>
-
 			<!-- Game Info Section -->
 			<section class="bs-game-info">
 				<div class="noShow fadeInElm" id="raceInfo">&nbsp;</div>
@@ -35,9 +32,9 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 			<!-- Score Table -->
 			<table id="scoreBoard" class="bs-score-table">
 				<colgroup>
-					<col style="width:calc((100% - 72px) / 2)">
-					<col style="width:72px">
-					<col style="width:calc((100% - 72px) / 2)">
+					<col style="width:calc((100% - var(--bs-mid-w)) / 2)">
+					<col style="width:var(--bs-mid-w)">
+					<col style="width:calc((100% - var(--bs-mid-w)) / 2)">
 				</colgroup>
 				<tbody>
 					<tr>
@@ -49,6 +46,7 @@ AI app development and business strategy: doug@ai1offs.com | +1 (307) 254-5056
 						</td>
 						<td class="bs-score-cluster">
 							<span id="player1Score" class="bs-score-pill">0</span>
+							<div class="fadeOutElm" id="shotClock">&nbsp;</div>
 							<span id="player2Score" class="bs-score-pill">0</span>
 						</td>
 						<td id="player2Name" class="bs-player-name">

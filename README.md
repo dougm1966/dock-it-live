@@ -67,6 +67,13 @@ In the Control Panel, use the upload buttons to:
 - Upload left/right sponsor logos
 - Upload 3 slideshow sponsor logos
 
+### How image storage works (simple)
+- **Automatic:** Image storage is created automatically the first time you upload an image. There’s nothing to install or set up.
+- **Stored on this computer:** Images are saved locally in the OBS Browser Source storage for this scoreboard.
+- **Stays after restarts:** Images typically remain even after restarting OBS or rebooting your PC.
+- **Not synced:** If you move to a different computer, you’ll need to upload the images again.
+- **Reusable:** Once an image is stored, it can be reused in other ad slots (this is the goal of the new image picker).
+
 ### 🚨 Note about image limits (current behavior)
 PCPLScoreBoard stores images in **IndexedDB** by default (binary storage) for much higher capacity.
 If IndexedDB isn’t available in your OBS Browser Source environment, it automatically falls back to **legacy `localStorage`** image storage (smaller limit). 📈🎯
@@ -88,7 +95,7 @@ If IndexedDB isn’t available in your OBS Browser Source environment, it automa
 > - **`localStorage` (legacy fallback):** typically **~5–10 MB per “site/origin”** in many Chromium-based browsers.
 >   - PCPLScoreBoard’s older image storage uses **base64**, which adds **~33% size overhead**, so real usable space for images can feel closer to **~3–7 MB**.
 >   - This is why uploading multiple sponsor/advertising images can hit limits quickly.
-> - **IndexedDB (preferred):** typically **much larger** (often **hundreds of MB**, and can scale higher depending on OBS/Chromium version, disk space, and browser quota rules).
+> - **IndexedDB (preferred):** typically **much larger** than `localStorage` (often **hundreds of MB or more**, depending on OBS/Chromium version and free disk space).
 >   - IndexedDB stores images as **binary blobs** (no base64 overhead), which is more space-efficient.
 >
 > **Bottom line:** if you’re using lots of sponsor/advertising graphics, IndexedDB is the way to go. If IndexedDB can’t be used for any reason, the scoreboard still works via `localStorage`—just with smaller headroom.
@@ -104,6 +111,11 @@ If IndexedDB isn’t available in your OBS Browser Source environment, it automa
 ### Uploads failing / “maximum file size” alert
 - This is usually the browser storage quota being exceeded.
 - The IndexedDB migration is intended to fix this for high-image-count sponsor/advertising usage.
+
+If uploads still fail:
+- Try deleting some stored images (once the image picker modal is added).
+- Make sure your computer has free disk space.
+- As a last resort, you can clear OBS’s browser cache/storage (this will remove saved images/settings for browser sources).
 
 ---
 

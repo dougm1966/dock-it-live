@@ -18,6 +18,9 @@
 	--slides-left: 1121px;
 	--player-name-font-size: 15pt;
 	--ext-padding: 6px;
+	--bs-mid-w: 72px;
+	--bs-clock-w: 3.4ch;
+	--bs-split-transition: 400ms;
 }
 
 /* 125% Scale */
@@ -83,6 +86,10 @@ body {
 	height: auto;
 }
 
+#scoreBoardDiv.clock-visible {
+	--bs-mid-w: 104px;
+}
+
 td {
 	border: 2px solid black;
 	border-radius: 10px;
@@ -129,9 +136,10 @@ td {
 	align-items: center;
 	justify-content: center;
 	gap: 2px;
-	width: 72px;
-	min-width: 72px;
-	max-width: 72px;
+	width: var(--bs-mid-w);
+	min-width: var(--bs-mid-w);
+	max-width: var(--bs-mid-w);
+	transition: width var(--bs-split-transition) ease, min-width var(--bs-split-transition) ease, max-width var(--bs-split-transition) ease;
 }
 
 .bs-score-pill {
@@ -156,8 +164,7 @@ td {
 }
 
 #player1Name,
-#player2Name,
-#shotClock {
+#player2Name {
 	background: rgba(255, 255, 255, 1);
 	font-size: 10pt;
 	font-weight: bold;
@@ -167,20 +174,32 @@ td {
 
 /* Standalone shot clock display (not part of the score table) */
 #shotClock {
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	bottom: 68px;
-	padding: 4px 15px;
-	border: 2px 2px 2px 2px;
-	border-radius: 4px 4px 4px 4px;
-	background: rgba(255, 255, 255, 0.9);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--bs-clock-w);
+	min-width: var(--bs-clock-w);
+	padding: 0 0.2ch;
+	height: 100%;
+	border: 2px solid #000;
+	border-radius: 10px;
+	background: green;
 	font-size: 15pt;
-	font-weight: normal;
+	font-weight: bold;
 	line-height: 1;
-	min-width: 2ch;
-	z-index: 11;
-	color: #000;
+	box-sizing: border-box;
+	margin: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	transition: width var(--bs-split-transition) ease, min-width var(--bs-split-transition) ease, padding var(--bs-split-transition) ease, border-width var(--bs-split-transition) ease;
+}
+
+#shotClock.fadeOutElm {
+	width: 0px;
+	min-width: 0px;
+	padding-left: 0;
+	padding-right: 0;
+	border-width: 0;
 }
 
 #player1Name,

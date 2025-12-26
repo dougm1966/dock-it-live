@@ -45,6 +45,16 @@ export class ShotClock {
     // Cache DOM elements
     this.clockDisplay = document.getElementById(DOM_IDS.shotClock);
     this.progressBar = document.getElementById(DOM_IDS.shotClockVis);
+    this.scoreBoard = document.getElementById(DOM_IDS.scoreBoard);
+  }
+
+  _setClockVisibleLayout(isVisible) {
+    if (!this.scoreBoard) return;
+    if (isVisible) {
+      this.scoreBoard.classList.add('clock-visible');
+    } else {
+      this.scoreBoard.classList.remove('clock-visible');
+    }
   }
 
   restoreFromStorage() {
@@ -83,6 +93,7 @@ export class ShotClock {
 
       // Ensure clock is visible but do not call show()/stop() since they reset display
       this.clockDisplay.classList.replace('fadeOutElm', 'fadeInElm');
+      this._setClockVisibleLayout(true);
       this._persistState();
       return;
     }
@@ -200,6 +211,7 @@ export class ShotClock {
    */
   show(selectedTime) {
     this.clockDisplay.classList.replace('fadeOutElm', 'fadeInElm');
+    this._setClockVisibleLayout(true);
 
     if (!this.intervalId) {
       if (selectedTime) {
@@ -223,6 +235,7 @@ export class ShotClock {
    */
   hide() {
     this.clockDisplay.classList.replace('fadeInElm', 'fadeOutElm');
+    this._setClockVisibleLayout(false);
 
     this.progressBar.classList.replace('fadeInElm', 'fadeOutElm');
     this._persistState();
