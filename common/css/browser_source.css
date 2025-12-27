@@ -90,7 +90,7 @@ body {
 
 #scoreBoardDiv.clock-visible {
 	--bs-mid-w: 112px;
-	--bs-inner-logo-shift: 20px;
+	--bs-inner-logo-shift: 0px;
 }
 
 td {
@@ -226,11 +226,11 @@ td {
 
 /* ===== Ball Tracker (8-ball under-name racks) ===== */
 :root {
-	--bt-ball-size: 18px;
+	--bt-ball-size: 16px;
 	--bt-rack-bg: rgba(255, 255, 255, 0.9);
-	--bt-rack-radius: calc((var(--bt-ball-size) / 2) + 4px);
-	--bt-rack-pad-x: 2px;
-	--bt-rack-pad-y: 2px;
+	--bt-rack-radius: calc((var(--bt-ball-size) / 2) + 6px);
+	--bt-rack-pad-x: 02px;
+	--bt-rack-pad-y: 02px;
 }
 
 .bt-rack {
@@ -238,10 +238,10 @@ td {
 	justify-content: center;
 	align-items: center;
 	gap: 2px;
-	margin-top: 0px;
+	margin-top: 05px;
 	background: var(--bt-rack-bg);
 	border-radius: 0;
-	padding: 4px var(--bt-rack-pad-x) var(--bt-rack-pad-y);
+	padding: 2px var(--bt-rack-pad-x) var(--bt-rack-pad-y);
 	width: fit-content;
 	max-width: 100%;
 	box-sizing: border-box;
@@ -569,8 +569,8 @@ tr.bt-full-row td.bt-cell {
 	position: absolute;
 	width: 90%;
 	left: 5%;
-	bottom: 5px;
-	height: 5px;
+	bottom: 3px;
+	height: 3px;
 	background: transparent;
 	border-radius: 5px;
 }
