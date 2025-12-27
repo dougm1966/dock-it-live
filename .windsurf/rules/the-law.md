@@ -1,41 +1,26 @@
 ---
 trigger: always_on
 ---
+# DOCK-IT.LIVE MIGRATION ENGINE
 
-# THE ARCHITECTURAL LAW
+## 1. MANDATORY CONTEXT
+You are refactoring 'g4ScoreBoard' into 'Dock-It.live'. 
+Before writing any code, you MUST reference the Project Bible in `/docs/`.
 
-### **1. Core Infrastructure Principles**
+## 2. THE THREE LAWS (Reference: /docs/02_Architecture/THE_LAW.md)
+1. **Local-Only:** Must run on `file:///`. No Node.js/Express. No http://localhost.
+2. **Database:** Dexie.js (IndexedDB) is the ONLY source of truth. No localStorage for game data.
+3. **Sync:** Standardized `{ type, payload }` envelopes via BroadcastChannel API.
 
-* **Local-First Only:** No Node.js, Express, or external servers. All files must run via the `file:///` protocol in OBS.
-* **Persistence:** Use **Dexie.js** (IndexedDB) for all data storage. Never rely on `localStorage` for images or large datasets.
-* **Synchronization:** Use the **BroadcastChannel API** for real-time communication between Docks and Overlays. No WebSockets unless specifically requested for OBS control logic.
-* **Frameworks:** Use **Vanilla JS** or lightweight libraries. Avoid heavy frameworks like React/Angular unless a build step (Vite) is active.
+## 3. FILE PROTOCOL (Reference: /docs/02_Architecture/SYSTEM_ARCHITECTURE.md)
+- NEW CODE: Move all refactored logic to `/src/`.
+- LEGACY CODE: Found in root. Do not delete. Move to `/docs/00_LEGACY_ARCHIVE/` only after replacement is verified.
+- PATHS: Use relative paths only (./ or ../) to maintain OBS compatibility.
 
-### **2. Directory Structure Mandate**
+## 4. AGENT PERSONAS (Reference: /docs/05_Agents/)
+- Act as 'The Pathfinder' for folder/path moves.
+- Act as 'The State Refactor' for Dexie.js integration.
+- Act as 'The Stylist' for Tailwind CSS implementation.
 
-All agents must adhere to the following folder organization:
-
-* `/core`: Global logic (DB initialization, Message Bus).
-* `/shared`: Assets and utilities used by both Docks and Overlays.
-* `/docks`: HTML/JS/CSS for OBS Custom Browser Docks (Control Panels).
-* `/overlays`: HTML/JS/CSS for OBS Browser Sources (Visuals).
-* `/features`: Individual sport modules (e.g., `/billiards`, `/darts`).
-
-### **3. Coding Standards**
-
-* **Modularity:** One file, one responsibility. Break large scripts into ES6 modules.
-* **Naming Conventions:** * Variables/Functions: `camelCase`
-* Constants: `UPPER_SNAKE_CASE`
-* Files: `kebab-case.js`
-
-
-* **State Management:** Always use a single "Source of Truth" (The Database). Docks update the DB; Overlays listen for changes via the Message Bus.
-
-### **4. OBS Compatibility Rules**
-
-* **Resolution:** Overlays must default to `1920x1080` unless specified.
-* **Transparency:** CSS must always include `body { background: transparent; overflow: hidden; }` for overlays.
-* **Paths:** Use **relative paths** for all assets to ensure portability across different user machines.
-
-
-
+## 5. TASK ENTRY POINT
+Always check `README.md` for the current Migration Status table before starting a task.

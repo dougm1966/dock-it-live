@@ -1,32 +1,25 @@
-### 📄 File: `/README.md` (Project Root)
+# 🎱 DOCK-IT.LIVE (formerly g4ScoreBoard)
 
-**Title: 🎱 DOCK-IT.LIVE | MODULAR BROADCAST ENGINE**
+## ⚠️ AI AGENT INSTRUCTIONS
+**This project is in an active MIGRATION PHASE. Do not write code based on the legacy root files.**
 
----
+1. **Context:** You are refactoring the legacy `g4ScoreBoard` into the modular `Dock-It.live` engine.
+2. **Mandatory Reading:** Before any task, read [`/docs/02_Architecture/THE_LAW.md`](./docs/02_Architecture/THE_LAW.md).
+3. **Refactor Goal:** Move logic from flat root files into the structure defined in [`/docs/02_Architecture/SYSTEM_ARCHITECTURE.md`](./docs/02_Architecture/SYSTEM_ARCHITECTURE.md).
 
-## **1. Project Intent**
+## 🏗️ Migration Status
+| Feature | Legacy File | Target Destination | State Logic |
+| :--- | :--- | :--- | :--- |
+| **Main Control** | `control_panel.html` | `/src/docks/master.html` | LocalStorage ➔ **Dexie.js** |
+| **Scoreboard** | `browser_source.html`| `/src/overlays/scoreboard.html`| Reactive DB Listeners |
+| **Ad Manager** | `advertising_control_panel.html` | `/src/docks/ads.html` | Asset Blobs in DB |
+| **Ad Display** | `advertising_frame.html` | `/src/overlays/ad-frame.html` | Broadcast Pulse |
 
-This repository is a high-performance, local-first broadcast suite designed for OBS (Open Broadcaster Software). It is currently undergoing a structural migration from the legacy `g4ScoreBoard` logic into a professional, modular architecture.
+## 🛠️ Core Standards
+* **Source of Truth:** Dexie.js (IndexedDB). No external servers.
+* **Sync:** Standardized `{ type, payload }` envelopes via BroadcastChannel API.
+* **Style:** Utility-first Tailwind CSS.
+* **Environment:** Compatible with OBS `file:///` protocol.
 
-## **2. 🤖 AI AGENT OPERATING PROCEDURES (MANDATORY)**
-
-**Before performing any code generation or file movement, all AI agents MUST read and adhere to the following documentation hierarchy:**
-
-1. **Read the Rules:** Consult [`/docs/02_Architecture/THE_LAW.md`](https://www.google.com/search?q=/docs/02_Architecture/THE_LAW.md) for execution constraints.
-2. **Verify the Map:** Follow the structure defined in [`/docs/02_Architecture/SYSTEM_ARCHITECTURE.md`](https://www.google.com/search?q=/docs/02_Architecture/SYSTEM_ARCHITECTURE.md).
-3. **Assume a Persona:** Adopt the appropriate protocol from [`/docs/05_Agents/Agent_Personas.md`](https://www.google.com/search?q=/docs/05_Agents/Agent_Personas.md) based on the task (Pathfinder, State Refactor, etc.).
-
-## **3. Core Technical Stack**
-
-* **Runtime:** Browser-native (Local `file:///` protocol support required).
-* **Persistence:** **Dexie.js (IndexedDB)** is the single source of truth; no `localStorage` for match state.
-* **Communication:** **BroadcastChannel API** using standardized `{ type, payload }` envelopes.
-* **Styling:** **Tailwind CSS** (Utility-first).
-
-## **4. Documentation Index**
-
-* **[01_Strategy](https://www.google.com/search?q=/docs/01_Strategy/):** Charter, Roadmap, and Competitive positioning.
-* **[02_Architecture](https://www.google.com/search?q=/docs/02_Architecture/):** The Laws, DB Schema, and Message Protocols.
-* **[03_Guides](https://www.google.com/search?q=/docs/03_Guides/):** OBS setup, Quick Start, and Sponsor Manager operation.
-* **[04_Legal](https://www.google.com/search?q=/docs/04_Legal/):** Distribution checklists, Privacy, and Terms.
-* **[05_Agents](https://www.google.com/search?q=/docs/05_Agents/):** Persona definitions and Migration Task Force protocols.
+## 📁 Documentation Index
+* [**Strategy**](./docs/01_Strategy/) | [**Architecture**](./docs/02_Architecture/) | [**Guides**](./docs/03_Guides/) | [**Agents**](./docs/05_Agents/)
