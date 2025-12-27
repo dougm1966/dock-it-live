@@ -20,7 +20,7 @@
 	--ext-padding: 6px;
 	--bs-mid-w: 72px;
 	--bs-mid-pad-x: 0px;
-	--bs-clock-w: 3.4ch;
+	--bs-clock-w: 3.6ch;
 	--bs-inner-logo-shift: 0px;
 	--bs-split-transition: 0.3s;
 }
@@ -89,8 +89,8 @@ body {
 }
 
 #scoreBoardDiv.clock-visible {
-	--bs-mid-w: 84px;
-	--bs-inner-logo-shift: 28px;
+	--bs-mid-w: 112px;
+	--bs-inner-logo-shift: 20px;
 }
 
 td {

@@ -170,7 +170,7 @@ class ShotClock {
     this.progressBar = document.getElementById(DOM_IDS.shotClockVis);
 
 	// Layout elements (used to split name bars when clock is visible)
-	this.scoreBoardRoot = document.getElementById(DOM_IDS.scoreBoard);
+	this.scoreBoardRoot = document.getElementById('scoreBoardDiv');
 	this.scoreTable = document.getElementById('scoreBoard');
 	this._colApplyAttempts = 0;
 	this._colApplyRaf = null;
@@ -246,7 +246,7 @@ class ShotClock {
 			if (!Number.isNaN(parsed) && parsed > 0) midPx = parsed;
 		}
 
-		const tableW = this.scoreTable.getBoundingClientRect().width;
+		const tableW = this.scoreTable.offsetWidth || this.scoreTable.getBoundingClientRect().width;
 		// If layout isn't ready yet, don't stamp bad widths.
 		if (!tableW || tableW < 300) return false;
 		// Prevent pathological values if mid is larger than the table.
@@ -257,6 +257,8 @@ class ShotClock {
 		cols[0].style.width = `${side}px`;
 		cols[1].style.width = `${mid}px`;
 		cols[2].style.width = `${side}px`;
+		
+		console.log('Applied column widths:', { side, mid, tableW, midPx });
 		return true;
 	}
 
