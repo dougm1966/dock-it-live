@@ -59,6 +59,18 @@ class AdController {
         this.applyBackgroundColor(backgroundColor);
       }
 
+      // Apply initial borders setting
+      const showBorders = state?.modules?.advertising?.showBorders;
+      if (showBorders !== undefined) {
+        this.applyBorders(showBorders, backgroundColor);
+      }
+
+      // Apply initial dividers setting
+      const showDividers = state?.modules?.advertising?.showDividers;
+      if (showDividers !== undefined) {
+        this.applyDividers(showDividers, backgroundColor);
+      }
+
       console.log('✅ Advertising Module ready!');
     } catch (error) {
       console.error('❌ Advertising Module initialization failed:', error);
@@ -91,9 +103,35 @@ class AdController {
       this.renderAllSlots();
     });
 
-    messenger.on('ADS_BACKGROUND_CHANGED', (message) => {
+    messenger.on('ADS_BACKGROUND_CHANGED', async (message) => {
       console.log('📡 ADS_BACKGROUND_CHANGED:', message.payload?.backgroundColor);
-      this.applyBackgroundColor(message.payload?.backgroundColor);
+      const backgroundColor = message.payload?.backgroundColor;
+      this.applyBackgroundColor(backgroundColor);
+
+      // Reapply borders and dividers with new contrasting color
+      const state = await stateManager.getState();
+      const showBorders = state?.modules?.advertising?.showBorders;
+      const showDividers = state?.modules?.advertising?.showDividers;
+      if (showBorders) {
+        this.applyBorders(showBorders, backgroundColor);
+      }
+      if (showDividers) {
+        this.applyDividers(showDividers, backgroundColor);
+      }
+    });
+
+    messenger.on('ADS_BORDERS_CHANGED', async (message) => {
+      console.log('📡 ADS_BORDERS_CHANGED:', message.payload?.showBorders);
+      const state = await stateManager.getState();
+      const backgroundColor = state?.modules?.advertising?.backgroundColor;
+      this.applyBorders(message.payload?.showBorders, backgroundColor);
+    });
+
+    messenger.on('ADS_DIVIDERS_CHANGED', async (message) => {
+      console.log('📡 ADS_DIVIDERS_CHANGED:', message.payload?.showDividers);
+      const state = await stateManager.getState();
+      const backgroundColor = state?.modules?.advertising?.backgroundColor;
+      this.applyDividers(message.payload?.showDividers, backgroundColor);
     });
   }
 
@@ -217,8 +255,13 @@ class AdController {
     // Clear existing content
     slotEl.innerHTML = '';
 
-    // If slot is not active or has no assetId, leave empty
-    if (!slotData || !slotData.active || !slotData.assetId) {
+    // Get title (if any)
+    const title = slotData?.title || '';
+    const hasImage = slotData && slotData.active && slotData.assetId;
+    const hasTitle = title.trim().length > 0;
+
+    // If slot is not active and has no title, leave empty
+    if (!slotData || (!slotData.active && !hasTitle)) {
       slotEl.classList.remove('ad-slot--active');
       // Reset span to default
       slotEl.style.gridColumn = '';
@@ -243,37 +286,98 @@ class AdController {
       slotEl.style.gridColumn = '';
     }
 
-    console.log(`📐 Rendering ${slotId} with span ${span} (region: ${region})`);
+    console.log(`📐 Rendering ${slotId} with span ${span} (region: ${region}), hasImage: ${hasImage}, hasTitle: ${hasTitle}`);
 
-    try {
-      // Get object URL from cache or create new one
-      let objectUrl = this.assetUrlCache.get(slotData.assetId);
+    // Case 1: Only title, no image
+    if (!hasImage && hasTitle) {
+      const titleEl = document.createElement('div');
+      titleEl.textContent = title;
+      titleEl.style.width = '100%';
+      titleEl.style.height = '100%';
+      titleEl.style.display = 'flex';
+      titleEl.style.alignItems = 'center';
+      titleEl.style.justifyContent = 'center';
+      titleEl.style.fontSize = '14px';
+      titleEl.style.fontWeight = '600';
+      titleEl.style.color = '#fff';
+      titleEl.style.textAlign = 'center';
+      titleEl.style.padding = '8px';
+      titleEl.style.wordWrap = 'break-word';
+      slotEl.appendChild(titleEl);
+      slotEl.classList.add('ad-slot--active');
+      return;
+    }
 
-      if (!objectUrl) {
-        objectUrl = await dexieDB.getAssetObjectUrl(slotData.assetId);
+    // Case 2 & 3: Has image (with or without title)
+    if (hasImage) {
+      try {
+        // Get object URL from cache or create new one
+        let objectUrl = this.assetUrlCache.get(slotData.assetId);
+
+        if (!objectUrl) {
+          objectUrl = await dexieDB.getAssetObjectUrl(slotData.assetId);
+
+          if (objectUrl) {
+            this.assetUrlCache.set(slotData.assetId, objectUrl);
+          }
+        }
 
         if (objectUrl) {
-          this.assetUrlCache.set(slotData.assetId, objectUrl);
-        }
-      }
+          // Create container for image and title
+          const container = document.createElement('div');
+          container.style.width = '100%';
+          container.style.height = '100%';
+          container.style.display = 'flex';
+          container.style.flexDirection = 'column';
+          container.style.alignItems = 'center';
+          container.style.justifyContent = 'center';
 
-      if (objectUrl) {
-        const img = document.createElement('img');
-        img.src = objectUrl;
-        img.alt = slotId;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'contain';
-        img.addEventListener('error', () => {
-          console.error(`❌ Failed to load image for ${slotId} (assetId: ${slotData.assetId})`);
-        });
-        slotEl.appendChild(img);
-        slotEl.classList.add('ad-slot--active');
-      } else {
-        console.warn(`⚠️ No object URL for ${slotId} (assetId: ${slotData.assetId})`);
+          // Create image
+          const img = document.createElement('img');
+          img.src = objectUrl;
+          img.alt = slotId;
+          img.style.width = '100%';
+          img.style.objectFit = 'contain';
+
+          // If there's a title, resize image to make room
+          if (hasTitle) {
+            img.style.height = 'calc(100% - 20px)'; // Reserve 20px for title
+            img.style.flex = '1 1 auto';
+          } else {
+            img.style.height = '100%';
+          }
+
+          img.addEventListener('error', () => {
+            console.error(`❌ Failed to load image for ${slotId} (assetId: ${slotData.assetId})`);
+          });
+
+          container.appendChild(img);
+
+          // Add title if present
+          if (hasTitle) {
+            const titleEl = document.createElement('div');
+            titleEl.textContent = title;
+            titleEl.style.width = '100%';
+            titleEl.style.fontSize = '11px';
+            titleEl.style.fontWeight = '600';
+            titleEl.style.color = '#fff';
+            titleEl.style.textAlign = 'center';
+            titleEl.style.padding = '2px 4px';
+            titleEl.style.whiteSpace = 'nowrap';
+            titleEl.style.overflow = 'hidden';
+            titleEl.style.textOverflow = 'ellipsis';
+            titleEl.style.flexShrink = '0';
+            container.appendChild(titleEl);
+          }
+
+          slotEl.appendChild(container);
+          slotEl.classList.add('ad-slot--active');
+        } else {
+          console.warn(`⚠️ No object URL for ${slotId} (assetId: ${slotData.assetId})`);
+        }
+      } catch (error) {
+        console.error(`❌ Error rendering slot ${slotId}:`, error);
       }
-    } catch (error) {
-      console.error(`❌ Error rendering slot ${slotId}:`, error);
     }
   }
 
@@ -296,6 +400,123 @@ class AdController {
     if (rightZone) {
       rightZone.style.backgroundColor = color;
     }
+
+    // Store current background color for dividers
+    this.currentBackgroundColor = color;
+  }
+
+  /**
+   * Apply borders to ad slots
+   */
+  applyBorders(showBorders, backgroundColor) {
+    const bgColor = backgroundColor || this.currentBackgroundColor;
+    const contrastColor = this.getContrastColor(bgColor);
+
+    console.log('🔲 Applying borders:', showBorders, 'Contrast color:', contrastColor);
+
+    // Get all ad slots
+    const slots = document.querySelectorAll('.ad-slot');
+
+    slots.forEach(slot => {
+      if (showBorders) {
+        slot.style.border = `1px solid ${contrastColor}`;
+      } else {
+        slot.style.border = 'none';
+      }
+    });
+  }
+
+  /**
+   * Apply dividers (80% tall lines between slots)
+   */
+  applyDividers(showDividers, backgroundColor) {
+    const bgColor = backgroundColor || this.currentBackgroundColor;
+    const contrastColor = this.getContrastColor(bgColor);
+
+    console.log('📏 Applying dividers:', showDividers, 'Contrast color:', contrastColor);
+
+    // Get ad zone elements
+    const topZone = document.getElementById('topAdZone');
+    const leftZone = document.getElementById('leftAdZone');
+    const rightZone = document.getElementById('rightAdZone');
+
+    // Remove existing dividers
+    document.querySelectorAll('.ad-divider').forEach(el => el.remove());
+
+    if (!showDividers) {
+      return;
+    }
+
+    // Create dividers for top zone (5 vertical dividers between 6 columns)
+    if (topZone) {
+      for (let i = 1; i <= 5; i++) {
+        const divider = document.createElement('div');
+        divider.className = 'ad-divider';
+        divider.style.position = 'absolute';
+        divider.style.left = `${(i / 6) * 100}%`;
+        divider.style.top = '10%'; // Center vertically (10% margin top + bottom = 80% height)
+        divider.style.width = '1px';
+        divider.style.height = '80%';
+        divider.style.backgroundColor = contrastColor;
+        divider.style.pointerEvents = 'none';
+        topZone.appendChild(divider);
+      }
+    }
+
+    // Create dividers for left zone (2 horizontal dividers between 3 rows)
+    if (leftZone) {
+      for (let i = 1; i <= 2; i++) {
+        const divider = document.createElement('div');
+        divider.className = 'ad-divider';
+        divider.style.position = 'absolute';
+        divider.style.top = `${(i / 3) * 100}%`;
+        divider.style.left = '10%'; // Center horizontally (10% margin left + right = 80% width)
+        divider.style.height = '1px';
+        divider.style.width = '80%';
+        divider.style.backgroundColor = contrastColor;
+        divider.style.pointerEvents = 'none';
+        leftZone.appendChild(divider);
+      }
+    }
+
+    // Create dividers for right zone (2 horizontal dividers between 3 rows)
+    if (rightZone) {
+      for (let i = 1; i <= 2; i++) {
+        const divider = document.createElement('div');
+        divider.className = 'ad-divider';
+        divider.style.position = 'absolute';
+        divider.style.top = `${(i / 3) * 100}%`;
+        divider.style.left = '10%'; // Center horizontally (10% margin left + right = 80% width)
+        divider.style.height = '1px';
+        divider.style.width = '80%';
+        divider.style.backgroundColor = contrastColor;
+        divider.style.pointerEvents = 'none';
+        rightZone.appendChild(divider);
+      }
+    }
+  }
+
+  /**
+   * Calculate contrasting color (black or white) based on background brightness
+   */
+  getContrastColor(color) {
+    if (!color) return 'rgba(255, 255, 255, 0.3)';
+
+    // Parse rgba/rgb color
+    const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+    if (!match) return 'rgba(255, 255, 255, 0.3)';
+
+    const r = parseInt(match[1]);
+    const g = parseInt(match[2]);
+    const b = parseInt(match[3]);
+
+    // Calculate relative luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    // Return black for light backgrounds, white for dark backgrounds
+    return luminance > 0.5
+      ? 'rgba(0, 0, 0, 0.4)'
+      : 'rgba(255, 255, 255, 0.3)';
   }
 
   /**

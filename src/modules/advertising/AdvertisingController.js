@@ -171,10 +171,38 @@ class AdvertisingController {
       this.updateMinimap();
     });
 
-    // Frame art (dividers) checkbox
-    document.getElementById('adsFrameArtChk')?.addEventListener('change', (e) => {
-      console.log('Frame art (dividers):', e.target.checked);
-      // TODO: Store in state and broadcast to advertising display
+    // Show borders checkbox (mutually exclusive with dividers)
+    document.getElementById('adsShowBordersChk')?.addEventListener('change', async (e) => {
+      const showBorders = e.target.checked;
+      console.log('🔲 Show borders:', showBorders);
+
+      // If borders are being enabled, disable dividers
+      if (showBorders) {
+        const dividersChk = document.getElementById('adsShowDividersChk');
+        if (dividersChk) dividersChk.checked = false;
+        await stateManager.setValue('modules.advertising.showDividers', false);
+        messenger.send('ADS_DIVIDERS_CHANGED', { showDividers: false });
+      }
+
+      await stateManager.setValue('modules.advertising.showBorders', showBorders);
+      messenger.send('ADS_BORDERS_CHANGED', { showBorders });
+    });
+
+    // Show dividers checkbox (mutually exclusive with borders)
+    document.getElementById('adsShowDividersChk')?.addEventListener('change', async (e) => {
+      const showDividers = e.target.checked;
+      console.log('📏 Show dividers:', showDividers);
+
+      // If dividers are being enabled, disable borders
+      if (showDividers) {
+        const bordersChk = document.getElementById('adsShowBordersChk');
+        if (bordersChk) bordersChk.checked = false;
+        await stateManager.setValue('modules.advertising.showBorders', false);
+        messenger.send('ADS_BORDERS_CHANGED', { showBorders: false });
+      }
+
+      await stateManager.setValue('modules.advertising.showDividers', showDividers);
+      messenger.send('ADS_DIVIDERS_CHANGED', { showDividers });
     });
 
     // Initial visibility update
@@ -443,10 +471,10 @@ class AdvertisingController {
     console.log(`Ad ${slotId} visibility:`, show);
   }
 
-  setAdTitle(slotId, title) {
-    console.log(`Ad ${slotId} title:`, title);
-    // TODO: Store title in logo slot metadata
-    // await stateManager.setLogoSlotMetadata(slotId, { title });
+  async setAdTitle(slotId, title) {
+    console.log(`📝 Ad ${slotId} title:`, title);
+    await stateManager.setLogoSlotMetadata(slotId, { title });
+    messenger.send('LOGO_SLOT_CHANGED', { slotId, title });
   }
 
   /**
@@ -1155,11 +1183,21 @@ class AdvertisingController {
     if (leftChk) leftChk.checked = showLeft;
     if (rightChk) rightChk.checked = showRight;
 
+    // Update borders and dividers checkboxes from state
+    const showBorders = advertising.showBorders || false;
+    const showDividers = advertising.showDividers || false;
+
+    const bordersChk = document.getElementById('adsShowBordersChk');
+    const dividersChk = document.getElementById('adsShowDividersChk');
+
+    if (bordersChk) bordersChk.checked = showBorders;
+    if (dividersChk) dividersChk.checked = showDividers;
+
     // Update ad rows visibility and minimap
     this.updateAdRowsVisibility();
     this.updateMinimap();
 
-    // Update all ad slot previews
+    // Update all ad slot previews and fields
     const regions = [
       { name: 'top', count: 6 },
       { name: 'left', count: 3 },
@@ -1170,7 +1208,27 @@ class AdvertisingController {
       for (let i = 1; i <= region.count; i++) {
         const slotId = `${region.name.charAt(0).toUpperCase()}${i}`;
         const slotData = state.logoSlots[slotId];
+        const prefix = `ad${this.capitalize(region.name)}${i}`;
 
+        // Update title field
+        const titleInput = document.getElementById(`${prefix}Title`);
+        if (titleInput && slotData?.title) {
+          titleInput.value = slotData.title;
+        }
+
+        // Update span dropdown
+        const spanSelect = document.getElementById(`${prefix}Span`);
+        if (spanSelect && slotData?.span) {
+          spanSelect.value = slotData.span;
+        }
+
+        // Update show checkbox
+        const showCheckbox = document.getElementById(`${prefix}Show`);
+        if (showCheckbox) {
+          showCheckbox.checked = slotData?.active !== false;
+        }
+
+        // Update preview image
         if (slotData && slotData.assetId && slotData.active) {
           await this.updateAdPreview(region.name, i, slotData.assetId);
         }
@@ -1217,11 +1275,14 @@ class AdvertisingController {
     const showLeft = document.getElementById('adsShowLeftChk')?.checked !== false;
     const showRight = document.getElementById('adsShowRightChk')?.checked !== false;
 
+    // If all regions are hidden, show all ad rows
+    const allHidden = !showTop && !showLeft && !showRight;
+
     // Hide/show top ad rows (T1-T6)
     for (let i = 1; i <= 6; i++) {
       const row = document.querySelector(`.ads-row[data-region="top"][data-index="${i}"]`);
       if (row) {
-        row.style.display = showTop ? '' : 'none';
+        row.style.display = (allHidden || showTop) ? '' : 'none';
       }
     }
 
@@ -1229,7 +1290,7 @@ class AdvertisingController {
     for (let i = 1; i <= 3; i++) {
       const row = document.querySelector(`.ads-row[data-region="left"][data-index="${i}"]`);
       if (row) {
-        row.style.display = showLeft ? '' : 'none';
+        row.style.display = (allHidden || showLeft) ? '' : 'none';
       }
     }
 
@@ -1237,11 +1298,11 @@ class AdvertisingController {
     for (let i = 1; i <= 3; i++) {
       const row = document.querySelector(`.ads-row[data-region="right"][data-index="${i}"]`);
       if (row) {
-        row.style.display = showRight ? '' : 'none';
+        row.style.display = (allHidden || showRight) ? '' : 'none';
       }
     }
 
-    console.log(`📋 Ad rows visibility updated: Top=${showTop}, Left=${showLeft}, Right=${showRight}`);
+    console.log(`📋 Ad rows visibility updated: Top=${showTop}, Left=${showLeft}, Right=${showRight}, AllHidden=${allHidden}`);
   }
 
   // ============================================================================
