@@ -257,7 +257,7 @@ export class BilliardsWidget {
       img.alt = n;
 
       // OBS COMPATIBILITY: Use absolute path for Vite dev server
-      img.src = `/PCLS-Balls/images/render0/${n}.png`;
+      img.src = `/src/modules/billiards/assets/balls/render0/${n}.png`;
 
       console.log(`  Ball ${n}: ${img.src}`);
 

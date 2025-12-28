@@ -15,6 +15,7 @@ import { AssetUploader } from '../../core/ads/AssetUploader.js';
 import { messenger } from '../../core/messaging/BroadcastMessenger.js';
 import { dexieDB } from '../../core/database/index.js';
 import { ScoreholioBridgeController } from '../scoreholio-bridge/BridgeController.js';
+import { ModalManager } from '../../core/ui/ModalManager.js';
 
 class MasterController {
   constructor() {
@@ -205,11 +206,11 @@ class MasterController {
 
         console.log(`✅ Player ${playerNum} photo uploaded:`, result.id);
       } else {
-        alert(`Photo upload failed: ${result.error}`);
+        await ModalManager.alert(`Photo upload failed: ${result.error}`);
       }
     } catch (error) {
       console.error(`Player ${playerNum} photo upload error:`, error);
-      alert('Photo upload failed. Check console for details.');
+      await ModalManager.alert('Photo upload failed. Check console for details.');
     }
   }
 
@@ -276,7 +277,8 @@ class MasterController {
 
     // Reset match
     document.getElementById('resetBtn')?.addEventListener('click', async () => {
-      if (confirm('Reset scores and match data?')) {
+      const confirmed = await ModalManager.confirm('Reset scores and match data?');
+      if (confirmed) {
         await stateManager.resetMatch();
         console.log('✅ Match reset');
       }
@@ -342,11 +344,11 @@ class MasterController {
 
         console.log(`✅ Logo uploaded to ${slotId}:`, result.id);
       } else {
-        alert(`Logo upload failed: ${result.error}`);
+        await ModalManager.alert(`Logo upload failed: ${result.error}`);
       }
     } catch (error) {
       console.error(`Logo upload error for ${slotId}:`, error);
-      alert('Logo upload failed. Check console for details.');
+      await ModalManager.alert('Logo upload failed. Check console for details.');
     }
   }
 
@@ -470,20 +472,26 @@ class MasterController {
       'resizable=yes',
     ].join(',');
 
-    const playerManagerWindow = window.open(playerManagerUrl, 'PlayerManager_Pro', features);
-
-    if (playerManagerWindow) {
-      playerManagerWindow.focus();
-      console.log('✅ Player Manager (Pro) opened in new window');
+    // OBS-compatible: Open Player Manager in internal fullscreen modal
+    // This avoids window.open() which is BLOCKED in OBS Browser Sources
+    try {
+      await ModalManager.openInternalWindow(playerManagerUrl, 'Player Manager Pro');
+      console.log('✅ Player Manager (Pro) opened in fullscreen modal');
       console.log('📡 Player Manager will broadcast PLAYER_SELECTED messages');
       console.log('📥 Master Shell is listening for broadcasts');
-    } else {
-      alert(
-        'Failed to open Player Manager.\n\n' +
-          'Popup blocked? Allow popups for this site.\n\n' +
-          'OBS Users: Add Player Manager as a Custom Browser Dock:\n' +
-          'Docks → Custom Browser Docks → Add:\n' +
-          `URL: ${window.location.origin}${window.location.pathname.replace(/[^/]*$/, '')}${playerManagerUrl}`
+    } catch (error) {
+      console.error('❌ Failed to open Player Manager:', error);
+      await ModalManager.info(
+        'Player Manager',
+        `<p><strong>OBS Users:</strong> Add Player Manager as a Custom Browser Dock:</p>
+         <ol>
+           <li>OBS → Docks → Custom Browser Docks</li>
+           <li>Dock Name: <code>Player Manager Pro</code></li>
+           <li>URL: <code>${window.location.origin}${window.location.pathname.replace(/[^/]*$/, '')}${playerManagerUrl}</code></li>
+           <li>Click Apply</li>
+         </ol>
+         <p><strong>Desktop Users:</strong> The Player Manager will open in a modal window within this panel.</p>`,
+        'Got It'
       );
     }
   }

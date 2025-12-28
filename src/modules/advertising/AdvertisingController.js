@@ -741,10 +741,18 @@ class AdvertisingController {
   openImagePickerModal() {
     const modal = document.getElementById('adsImagePickerModal');
     if (modal) {
+      // Scroll to top to ensure modal is visible
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
       modal.classList.remove('noShow');
       modal.style.display = ''; // Remove inline display:none
       document.body.classList.add('ads-modal-open');
       this.loadImageLibrary();
+
+      // Auto-focus on the upload button after a brief delay
+      setTimeout(() => {
+        document.getElementById('adsPickUploadNew')?.focus();
+      }, 100);
     }
   }
 

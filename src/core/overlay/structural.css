@@ -1,0 +1,285 @@
+/**
+ * Structural CSS - Core Overlay Styles
+ *
+ * Contains structural and layout styles for the core overlay system,
+ * including OBS-compatible modal dialogs.
+ *
+ * @created 2025-12-28
+ * @version 1.0.0
+ */
+
+/* ============================================================
+   OBS-Compatible Modal System
+   ============================================================ */
+
+/**
+ * Modal Backdrop - Full-screen overlay
+ */
+.obs-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: obs-modal-fade-in 0.2s ease-out;
+}
+
+.obs-modal-closing {
+  animation: obs-modal-fade-out 0.2s ease-out;
+}
+
+@keyframes obs-modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes obs-modal-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/**
+ * Modal Backdrop - Semi-transparent overlay
+ */
+.obs-modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1;
+}
+
+/**
+ * Modal Content Container
+ */
+.obs-modal-content {
+  position: relative;
+  z-index: 2;
+  background: #1e1e1e;
+  border: 2px solid #3a3a3a;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  min-width: 400px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: auto;
+  animation: obs-modal-slide-in 0.2s ease-out;
+}
+
+@keyframes obs-modal-slide-in {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/**
+ * Modal Header
+ */
+.obs-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #3a3a3a;
+  background: #252525;
+}
+
+.obs-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/**
+ * Modal Body
+ */
+.obs-modal-body {
+  padding: 20px;
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+
+.obs-modal-body p {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/**
+ * Modal Footer
+ */
+.obs-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #3a3a3a;
+  background: #252525;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/**
+ * Modal Buttons
+ */
+.obs-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.obs-btn:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+}
+
+.obs-btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.obs-btn-primary:hover {
+  background: #2563eb;
+}
+
+.obs-btn-primary:active {
+  background: #1d4ed8;
+}
+
+.obs-btn-secondary {
+  background: #4b5563;
+  color: white;
+}
+
+.obs-btn-secondary:hover {
+  background: #6b7280;
+}
+
+.obs-btn-secondary:active {
+  background: #374151;
+}
+
+/**
+ * Fullscreen Modal (for iframe windows like Player Manager)
+ */
+.obs-fullscreen-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: obs-modal-fade-in 0.3s ease-out;
+}
+
+.obs-modal-fullscreen-content {
+  position: relative;
+  width: 95vw;
+  height: 95vh;
+  background: #1e1e1e;
+  border: 2px solid #3a3a3a;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.obs-modal-fullscreen-header {
+  padding: 12px 16px;
+  background: #252525;
+  border-bottom: 1px solid #3a3a3a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.obs-modal-fullscreen-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.obs-btn-close {
+  background: #ef4444;
+  color: white;
+  font-size: 24px;
+  line-height: 1;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.obs-btn-close:hover {
+  background: #dc2626;
+}
+
+.obs-btn-close:active {
+  background: #b91c1c;
+}
+
+.obs-modal-fullscreen-content iframe {
+  flex: 1;
+  border: none;
+  background: white;
+}
+
+/* ============================================================
+   Responsive Adjustments
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .obs-modal-content {
+    min-width: 90vw;
+    max-width: 90vw;
+  }
+
+  .obs-modal-fullscreen-content {
+    width: 98vw;
+    height: 98vh;
+  }
+}
+
+/* ============================================================
+   Dark Mode Enhancements
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .obs-modal-content {
+    background: #0f0f0f;
+    border-color: #2a2a2a;
+  }
+
+  .obs-modal-header,
+  .obs-modal-footer {
+    background: #1a1a1a;
+    border-color: #2a2a2a;
+  }
+
+  .obs-modal-body {
+    color: #d0d0d0;
+  }
+}

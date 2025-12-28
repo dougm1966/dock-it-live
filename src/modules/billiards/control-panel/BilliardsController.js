@@ -343,7 +343,7 @@ class BilliardsController {
       // Use image instead of div with text
       const ballImg = document.createElement('img');
       ballImg.className = 'btcp-ball';
-      ballImg.src = `../assets/balls/render0/${num}.png`;
+      ballImg.src = `/src/modules/billiards/assets/balls/render0/${num}.png`;
       ballImg.alt = num;
       ballImg.dataset.ball = num;
       ballImg.style.cursor = 'pointer';

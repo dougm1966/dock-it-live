@@ -787,8 +787,8 @@ class OverlayController {
       img.className = 'bt-ball';
       img.alt = n;
 
-      // OBS COMPATIBILITY: Use relative path for file:// protocol
-      img.src = `../assets/balls/render0/${n}.png`;
+      // OBS COMPATIBILITY: Use absolute path from root for file:// protocol
+      img.src = `/src/modules/billiards/assets/balls/render0/${n}.png`;
 
       const isPocketed = !!pocketed[String(n)];
       if (options && options.placeholder) {
