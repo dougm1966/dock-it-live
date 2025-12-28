@@ -22,7 +22,73 @@ Features:
 
 	<!-- Skin CSS (complete styling - layout + visuals) -->
 	<!-- SkinManager will set the href to load the selected skin -->
-	<link id="overlay-skin-link" rel="stylesheet" href="../../modules/overlay/skins/default/default.css" />
+	<link id="overlay-skin-link" rel="stylesheet" href="" />
+
+	<style>
+		/* Prevent FOUC (Flash of Unstyled Content) */
+		#mainOverlay {
+			opacity: 0;
+			transition: opacity 0.1s ease-in;
+		}
+
+		#mainOverlay.loaded {
+			opacity: 1;
+		}
+
+		/* Ad Zone Styling */
+		.ad-zone {
+			position: fixed;
+			background: transparent;
+			z-index: 1000;
+			display: grid;
+			gap: 4px;
+		}
+
+		.ad-zone-top {
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 117px; /* 125px total - 4px top padding - 4px bottom padding */
+			grid-template-columns: repeat(6, 1fr);
+			padding: 4px;
+		}
+
+		.ad-zone-left {
+			top: 125px;
+			left: 0;
+			bottom: 0;
+			width: 117px; /* 125px total - 4px left padding - 4px right padding */
+			grid-template-rows: repeat(3, 1fr);
+			padding: 4px;
+		}
+
+		.ad-zone-right {
+			top: 125px;
+			right: 0;
+			bottom: 0;
+			width: 117px; /* 125px total - 4px left padding - 4px right padding */
+			grid-template-rows: repeat(3, 1fr);
+			padding: 4px;
+		}
+
+		.ad-slot {
+			background: transparent;
+			overflow: hidden;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.ad-slot img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+		}
+
+		.ad-slot--active {
+			/* No background - only the zone perimeter has color */
+		}
+	</style>
 </head>
 <body>
 	<!-- Top Ad Zone: 6-column CSS Grid -->
@@ -120,5 +186,20 @@ Features:
 	<!-- Load Overlay Controller as ES Module -->
 	<!-- NOTE: This should point to a universal OverlayController or sport-specific controller -->
 	<script type="module" src="../../modules/billiards/overlay/OverlayController.js"></script>
+
+	<!-- Load Advertising Module Controller (if enabled) -->
+	<script type="module" src="/src/modules/advertising/AdController.js"></script>
+
+	<!-- Prevent FOUC by showing overlay once loaded -->
+	<script>
+		window.addEventListener('DOMContentLoaded', () => {
+			// Add a small delay to ensure CSS is applied
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					document.getElementById('mainOverlay')?.classList.add('loaded');
+				});
+			});
+		});
+	</script>
 </body>
 </html>

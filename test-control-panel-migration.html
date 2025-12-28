@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Control Panel Migration Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    h1 { color: #4ec9b0; }
+    .section {
+      background: #252526;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border-left: 4px solid #007acc;
+    }
+    input, button {
+      padding: 8px 12px;
+      margin: 5px;
+      border: 1px solid #444;
+      background: #333;
+      color: #ddd;
+      border-radius: 4px;
+    }
+    button {
+      cursor: pointer;
+      background: #007acc;
+    }
+    button:hover {
+      background: #005a9e;
+    }
+    .score {
+      font-size: 32px;
+      font-weight: bold;
+      color: #4ec9b0;
+    }
+    #status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      background: #2d2d30;
+    }
+    .success { color: #4ec9b0; }
+    .error { color: #f48771; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Control Panel Migration Test</h1>
+
+  <div id="status">
+    <p>StateManager Status: <span id="stateStatus">Loading...</span></p>
+  </div>
+
+  <!-- Player Names Section -->
+  <div class="section">
+    <h2>Player Names & Ratings</h2>
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px;">Player 1:</label>
+      <input type="text" id="p1Name" placeholder="Player 1 Name" value="Player 1" style="width: 200px;">
+      <input type="text" id="p1Fargo" placeholder="Fargo (e.g., Fargo 520)" style="width: 150px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px;">Player 2:</label>
+      <input type="text" id="p2Name" placeholder="Player 2 Name" value="Player 2" style="width: 200px;">
+      <input type="text" id="p2Fargo" placeholder="Fargo (e.g., Fargo 480)" style="width: 150px;">
+    </div>
+    <button onclick="sendNames()">Update Names & Ratings</button>
+  </div>
+
+  <!-- Race/Wager Info -->
+  <div class="section">
+    <h2>Match Info</h2>
+    <input type="text" id="raceInfoTxt" placeholder="Race Info (e.g., Race to 7)">
+    <input type="text" id="wagerInfoTxt" placeholder="Wager Info (e.g., $100)">
+    <br>
+    <button onclick="sendNames()">Update Info</button>
+  </div>
+
+  <!-- Scores Section -->
+  <div class="section">
+    <h2>Scores</h2>
+    <div style="display: flex; justify-content: space-around;">
+      <div>
+        <h3>Player 1</h3>
+        <div class="score" id="p1ScoreDisplay">0</div>
+        <div>
+          <button id="sendP1Score" onclick="postScore('add', 1)">+1 Score</button>
+          <button id="sendP1ScoreSub" onclick="postScore('sub', 1)">-1 Score</button>
+        </div>
+      </div>
+      <div>
+        <h3>Player 2</h3>
+        <div class="score" id="p2ScoreDisplay">0</div>
+        <div>
+          <button id="sendP2Score" onclick="postScore('add', 2)">+2 Score</button>
+          <button id="sendP2ScoreSub" onclick="postScore('sub', 2)">-2 Score</button>
+        </div>
+      </div>
+    </div>
+    <input type="number" id="scoreAmount" value="1" min="1" max="10" style="width: 60px;">
+    <label>Score amount</label>
+    <br><br>
+    <button onclick="resetScore()">🔄 Reset Scores Only</button>
+    <button onclick="clearNamesAndInfo()">🧹 Clear Names & Info (Keep Scores)</button>
+    <button onclick="completeReset()" style="background: #c42b1c;">🗑️ Complete Reset (ALL)</button>
+  </div>
+
+  <!-- Extension buttons (placeholders) -->
+  <div style="display: none;">
+    <div id="p1ExtReset">P1 Ext Reset</div>
+    <div id="p2ExtReset">P2 Ext Reset</div>
+    <div id="p1extensionBtn">P1 Extension</div>
+    <div id="p2extensionBtn">P2 Extension</div>
+  </div>
+
+  <!-- Database Inspector -->
+  <div class="section">
+    <h2>Database Inspector</h2>
+    <button onclick="inspectDatabase()">Show Current State</button>
+    <pre id="dbOutput" style="background: #1e1e1e; padding: 10px; overflow: auto; max-height: 300px;"></pre>
+  </div>
+
+  <!-- localStorage Inspector -->
+  <div class="section">
+    <h2>localStorage Check (Should Be Empty)</h2>
+    <button onclick="checkLocalStorage()">Check localStorage</button>
+    <button onclick="clearLocalStorage()">Clear localStorage</button>
+    <pre id="lsOutput" style="background: #1e1e1e; padding: 10px; overflow: auto; max-height: 200px;"></pre>
+  </div>
+
+  <!-- Load StateManager Bridge -->
+  <script type="module" src="/src/common/js/stateManagerBridge.js"></script>
+
+  <!-- Load Migrated Control Panel -->
+  <script type="module" src="/src/common/js/control_panel_migrated.js"></script>
+
+  <!-- Test Functions -->
+  <script>
+    // Subscribe to state changes and update UI
+    window.addEventListener('stateManagerReady', async () => {
+      document.getElementById('stateStatus').innerHTML = '<span class="success">✅ Ready</span>';
+
+      // Subscribe to state changes for real-time UI updates
+      window.stateManager.subscribe(state => {
+        console.log('State changed:', state);
+        updateScoreDisplay(state);
+      });
+
+      // Initial load
+      const state = await window.stateManager.getState();
+      updateScoreDisplay(state);
+    });
+
+    function updateScoreDisplay(state) {
+      if (state && state.matchData) {
+        document.getElementById('p1ScoreDisplay').textContent = state.matchData.player1?.score || 0;
+        document.getElementById('p2ScoreDisplay').textContent = state.matchData.player2?.score || 0;
+      }
+    }
+
+    async function inspectDatabase() {
+      try {
+        const state = await window.stateManager.getState();
+        document.getElementById('dbOutput').textContent = JSON.stringify(state, null, 2);
+      } catch (error) {
+        document.getElementById('dbOutput').textContent = 'Error: ' + error.message;
+      }
+    }
+
+    function checkLocalStorage() {
+      const keys = Object.keys(localStorage);
+      const output = keys.length === 0
+        ? '✅ localStorage is empty (GOOD!)'
+        : `❌ Found ${keys.length} localStorage keys:\n` + keys.join('\n');
+      document.getElementById('lsOutput').textContent = output;
+    }
+
+    function clearLocalStorage() {
+      localStorage.clear();
+      checkLocalStorage();
+      alert('localStorage cleared!');
+    }
+  </script>
+</body>
+</html>

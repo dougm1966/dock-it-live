@@ -36,6 +36,14 @@ class DexieWrapper {
       players: '++id, name, rating, country, photoUrl, sport',
     });
 
+    // Version 3: Schema consolidation (no changes, just version bump to clear Dexie warning)
+    this.db.version(3).stores({
+      // All tables remain the same
+      assets: 'id, type, tags, updatedAt',
+      match_state: 'id, sport, timestamp',
+      players: '++id, name, rating, country, photoUrl, sport',
+    });
+
     // URL cache for blob object URLs (performance optimization)
     this._urlCache = new Map();
   }

@@ -8,6 +8,24 @@
       "version": "1.0.0",
       "layout": "fullwidth-bottom",
       "tags": ["classic", "traditional", "steelblue", "fullwidth"]
+    },
+    {
+      "id": "pro-sleek",
+      "name": "Pro Sleek",
+      "description": "Modern professional design with diagonal gradients (navy→cyan/purple), glassmorphism effects, beveled edges, enhanced animations",
+      "author": "Dock-It.live",
+      "version": "1.0.0",
+      "layout": "fullwidth-bottom",
+      "tags": ["modern", "professional", "glassmorphism", "gradient", "dark"]
+    },
+    {
+      "id": "sharp-edge",
+      "name": "Sharp Edge",
+      "description": "Angular tactical design with zero rounded corners, chevron cuts, hard edges, and electric blue/orange accents",
+      "author": "Dock-It.live",
+      "version": "1.0.0",
+      "layout": "fullwidth-bottom",
+      "tags": ["angular", "tactical", "sharp", "geometric", "dark"]
     }
   ],
   "notes": {

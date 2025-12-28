@@ -32,7 +32,7 @@
       "enabled": false
     },
     "advertising": {
-      "enabled": false,
+      "enabled": true,
       "showTop": true,
       "showLeft": true,
       "showRight": true

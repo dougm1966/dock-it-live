@@ -116,7 +116,10 @@ class AdvertisingController {
     });
 
     // Span selector
-    document.getElementById(`${prefix}Span`)?.addEventListener('change', (e) => {
+    const spanSelect = document.getElementById(`${prefix}Span`);
+    console.log(`Setting up span selector for ${slotId}:`, spanSelect ? 'Found' : 'NOT FOUND', `ID: ${prefix}Span`);
+    spanSelect?.addEventListener('change', (e) => {
+      console.log(`Span changed for ${slotId} to:`, e.target.value);
       this.setAdSpan(slotId, parseInt(e.target.value));
     });
 
@@ -187,17 +190,24 @@ class AdvertisingController {
       this.closeFrameBgModal();
     });
 
-    // HSL sliders for color picker
-    document.getElementById('adsHueSlider')?.addEventListener('input', (e) => {
-      this.updateFrameBackground();
+    // Close on backdrop click
+    document.getElementById('adsFrameBgModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'adsFrameBgModal') {
+        this.closeFrameBgModal();
+      }
     });
 
-    document.getElementById('adsSatSlider')?.addEventListener('input', (e) => {
-      this.updateFrameBackground();
+    // Color picker canvas and sliders
+    this.initColorPicker();
+
+    // Hue slider
+    document.getElementById('adsColorHue')?.addEventListener('input', () => {
+      this.updateColorFromSliders();
     });
 
-    document.getElementById('adsLumSlider')?.addEventListener('input', (e) => {
-      this.updateFrameBackground();
+    // Alpha/transparency slider
+    document.getElementById('adsColorAlpha')?.addEventListener('input', () => {
+      this.updateColorFromSliders();
     });
 
     // Image picker modal controls
@@ -396,10 +406,29 @@ class AdvertisingController {
     }
   }
 
-  setAdSpan(slotId, span) {
-    console.log(`Ad ${slotId} span set to:`, span);
-    // TODO: Store span in logo slot metadata
-    // await stateManager.setLogoSlotMetadata(slotId, { span });
+  async setAdSpan(slotId, span) {
+    console.log(`🎯 setAdSpan called - slotId: ${slotId}, span: ${span}`);
+
+    const region = slotId[0]; // 'T', 'L', or 'R'
+    const slotNum = parseInt(slotId[1]);
+    const regionName = region === 'T' ? 'top' : region === 'L' ? 'left' : 'right';
+
+    // Clamp span to valid range (1-3)
+    const validSpan = Math.max(1, Math.min(3, parseInt(span) || 1));
+
+    // Store span in logo slot metadata
+    await stateManager.setLogoSlotMetadata(slotId, { span: validSpan });
+
+    // Update expected dimensions display
+    this.updateExpectedDimensions(slotId, regionName, validSpan);
+
+    // Recalculate which slots are blocked based on ALL spans in this region
+    await this.recalculateRegionBlocking(regionName);
+
+    // Broadcast change to overlay
+    messenger.send('LOGO_SLOT_CHANGED', { slotId, span: validSpan });
+
+    console.log(`✅ Span set to ${validSpan} for ${slotId}`);
   }
 
   setAdFrame(slotId, hasFrame) {
@@ -418,6 +447,87 @@ class AdvertisingController {
     console.log(`Ad ${slotId} title:`, title);
     // TODO: Store title in logo slot metadata
     // await stateManager.setLogoSlotMetadata(slotId, { title });
+  }
+
+  /**
+   * Update expected dimensions display based on span
+   */
+  updateExpectedDimensions(slotId, regionName, span) {
+    const slotNum = slotId[1];
+    const prefix = `ad${this.capitalize(regionName)}${slotNum}`;
+    const uploadBtn = document.getElementById(`triggerAd${this.capitalize(regionName)}${slotNum}`);
+    const container = uploadBtn?.closest('.ads-row');
+    const dimsEl = container?.querySelector('.ads-dims');
+
+    let dimensions = '';
+    if (regionName === 'top') {
+      dimensions = `${320 * span}×180`; // Legacy format: 320×180, 640×180, 960×180
+    } else {
+      dimensions = `320×${360 * span}`; // Legacy format: 320×360, 320×720, 320×1080
+    }
+
+    if (dimsEl) {
+      dimsEl.textContent = dimensions;
+    }
+  }
+
+  /**
+   * Recalculate which slots are blocked based on all spans in the region
+   * This matches the legacy adsNormalizePlacementPositions logic
+   */
+  async recalculateRegionBlocking(regionName) {
+    const maxSlots = regionName === 'top' ? 6 : 3;
+    const regionLetter = regionName === 'top' ? 'T' : regionName === 'left' ? 'L' : 'R';
+
+    // Get all spans for this region from state
+    const state = await stateManager.getState();
+    const covered = new Array(maxSlots + 1).fill(false);
+
+    // Calculate which positions are covered by spans
+    for (let i = 1; i <= maxSlots; i++) {
+      const slotId = `${regionLetter}${i}`;
+      const slotData = state?.logoSlots?.[slotId];
+      const span = Math.max(1, Math.min(3, parseInt(slotData?.span) || 1));
+      const isActive = slotData?.active !== false;
+
+      if (isActive && !covered[i]) {
+        // Mark this slot and subsequent slots as covered
+        for (let j = i; j < i + span && j <= maxSlots; j++) {
+          covered[j] = true;
+        }
+        // Unblock the anchor slot
+        this.setSlotBlocked(regionName, i, false);
+      } else if (covered[i]) {
+        // This slot is covered by a previous span
+        this.setSlotBlocked(regionName, i, true);
+      } else {
+        // Not covered
+        this.setSlotBlocked(regionName, i, false);
+      }
+    }
+  }
+
+  /**
+   * Set a slot's blocked state (enable/disable controls, gray out)
+   */
+  setSlotBlocked(regionName, index, blocked) {
+    const prefix = `ad${this.capitalize(regionName)}${index}`;
+    const uploadBtn = document.getElementById(`triggerAd${this.capitalize(regionName)}${index}`);
+    const container = uploadBtn?.closest('.ads-row');
+
+    if (!container) return;
+
+    if (blocked) {
+      container.style.opacity = '0.4';
+      container.style.pointerEvents = 'none';
+      const inputs = container.querySelectorAll('input, select, button');
+      inputs.forEach(input => input.disabled = true);
+    } else {
+      container.style.opacity = '1';
+      container.style.pointerEvents = 'auto';
+      const inputs = container.querySelectorAll('input, select, button');
+      inputs.forEach(input => input.disabled = false);
+    }
   }
 
   async toggleAdRegion(region, show) {
@@ -485,16 +595,88 @@ class AdvertisingController {
   // MODALS
   // ============================================================================
 
-  openFrameBgModal() {
+  async openFrameBgModal() {
     const modal = document.getElementById('adsFrameBgModal');
-    modal?.classList.remove('noShow');
-    document.body.classList.add('ads-modal-open');
+    if (modal) {
+      modal.classList.remove('noShow');
+      modal.style.display = ''; // Remove inline display:none
+      document.body.classList.add('ads-modal-open');
+
+      // Load saved color from state
+      await this.loadSavedColor();
+    }
   }
 
-  closeFrameBgModal() {
+  async loadSavedColor() {
+    try {
+      const state = await stateManager.getState();
+      const savedColor = state?.modules?.advertising?.backgroundColor;
+
+      if (savedColor) {
+        // Parse the saved rgba color and convert to HSV for the picker
+        const rgbaMatch = savedColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (rgbaMatch) {
+          const r = parseInt(rgbaMatch[1]) / 255;
+          const g = parseInt(rgbaMatch[2]) / 255;
+          const b = parseInt(rgbaMatch[3]) / 255;
+          const a = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
+
+          // Convert RGB to HSV
+          const hsv = this.rgbToHsv(r, g, b);
+
+          // Update color picker state
+          this.colorPicker.hue = hsv.h;
+          this.colorPicker.saturation = hsv.s;
+          this.colorPicker.value = hsv.v;
+          this.colorPicker.alpha = a;
+
+          // Update sliders
+          const hueSlider = document.getElementById('adsColorHue');
+          const alphaSlider = document.getElementById('adsColorAlpha');
+          if (hueSlider) hueSlider.value = hsv.h;
+          if (alphaSlider) alphaSlider.value = Math.round(a * 100);
+
+          // Redraw canvas and update display
+          this.drawColorCanvas();
+          this.updateBackgroundColor();
+
+          console.log('📖 Loaded saved color:', savedColor);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load saved color:', error);
+    }
+  }
+
+  async closeFrameBgModal() {
     const modal = document.getElementById('adsFrameBgModal');
-    modal?.classList.add('noShow');
-    document.body.classList.remove('ads-modal-open');
+    if (modal) {
+      modal.classList.add('noShow');
+      modal.style.display = 'none';
+      document.body.classList.remove('ads-modal-open');
+
+      // Save the selected color to state
+      await this.saveBackgroundColor();
+    }
+  }
+
+  async saveBackgroundColor() {
+    // Convert HSV to RGB
+    const h = this.colorPicker.hue;
+    const s = this.colorPicker.saturation;
+    const v = this.colorPicker.value;
+    const a = this.colorPicker.alpha;
+
+    const rgb = this.hsvToRgb(h, s, v);
+    const color = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${a})`;
+
+    // Save to state
+    await stateManager.setValue('modules.advertising.backgroundColor', color);
+
+    // Broadcast change to overlay
+    messenger.send('ADS_BACKGROUND_CHANGED', { backgroundColor: color });
+
+    console.log('✅ Background color saved:', color);
   }
 
   openImagePickerModal() {
@@ -540,30 +722,220 @@ class AdvertisingController {
   // COLOR PICKER
   // ============================================================================
 
-  updateFrameBackground() {
-    const hue = document.getElementById('adsHueSlider')?.value || 0;
-    const sat = document.getElementById('adsSatSlider')?.value || 100;
-    const lum = document.getElementById('adsLumSlider')?.value || 50;
+  initColorPicker() {
+    this.colorPicker = {
+      hue: 270, // Purple default
+      saturation: 1.0,
+      value: 1.0,
+      alpha: 1.0 // Fully opaque by default
+    };
 
-    const color = `hsl(${hue}, ${sat}%, ${lum}%)`;
+    const canvas = document.getElementById('adsColorSv');
+    if (!canvas) return;
 
-    // Update preview
-    const preview = document.getElementById('adsFrameBgPreview');
-    if (preview) {
-      preview.style.backgroundColor = color;
+    // Draw initial gradient
+    this.drawColorCanvas();
+
+    // Handle canvas clicks and drags
+    let isDragging = false;
+
+    canvas.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      this.updateColorFromCanvas(e);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        this.updateColorFromCanvas(e);
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      isDragging = false;
+    });
+
+    // Touch support
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      isDragging = true;
+      const touch = e.touches[0];
+      this.updateColorFromCanvas(touch);
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (isDragging) {
+        const touch = e.touches[0];
+        this.updateColorFromCanvas(touch);
+      }
+    });
+
+    canvas.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+  }
+
+  drawColorCanvas() {
+    const canvas = document.getElementById('adsColorSv');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Base color from hue
+    const hue = this.colorPicker.hue;
+    ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+    ctx.fillRect(0, 0, width, height);
+
+    // White gradient (left to right) for saturation
+    const whiteGrad = ctx.createLinearGradient(0, 0, width, 0);
+    whiteGrad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    whiteGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = whiteGrad;
+    ctx.fillRect(0, 0, width, height);
+
+    // Black gradient (top to bottom) for value
+    const blackGrad = ctx.createLinearGradient(0, 0, 0, height);
+    blackGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    blackGrad.addColorStop(1, 'rgba(0, 0, 0, 1)');
+    ctx.fillStyle = blackGrad;
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  updateColorFromCanvas(e) {
+    const canvas = document.getElementById('adsColorSv');
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+
+    // Calculate saturation (0 to 1) from x position
+    this.colorPicker.saturation = x / rect.width;
+
+    // Calculate value (1 to 0) from y position
+    this.colorPicker.value = 1 - (y / rect.height);
+
+    // Update thumb position
+    const thumb = document.getElementById('adsColorSvThumb');
+    if (thumb) {
+      thumb.style.left = `${x}px`;
+      thumb.style.top = `${y}px`;
     }
 
-    // Update value displays
-    const hueVal = document.getElementById('adsHueVal');
-    const satVal = document.getElementById('adsSatVal');
-    const lumVal = document.getElementById('adsLumVal');
+    this.updateBackgroundColor();
+  }
 
-    if (hueVal) hueVal.textContent = hue;
-    if (satVal) satVal.textContent = `${sat}%`;
-    if (lumVal) lumVal.textContent = `${lum}%`;
+  updateColorFromSliders() {
+    // Update hue from slider
+    const hueSlider = document.getElementById('adsColorHue');
+    if (hueSlider) {
+      this.colorPicker.hue = parseInt(hueSlider.value);
+    }
 
-    console.log('Frame background color:', color);
-    // TODO: Store in state and apply to advertising display
+    // Update alpha from slider
+    const alphaSlider = document.getElementById('adsColorAlpha');
+    const alphaLabel = document.getElementById('adsColorAlphaLabel');
+    if (alphaSlider) {
+      this.colorPicker.alpha = parseInt(alphaSlider.value) / 100;
+      if (alphaLabel) {
+        alphaLabel.textContent = `${alphaSlider.value}%`;
+      }
+    }
+
+    // Redraw canvas with new hue
+    this.drawColorCanvas();
+
+    this.updateBackgroundColor();
+  }
+
+  updateBackgroundColor() {
+    // Convert HSV to RGB
+    const h = this.colorPicker.hue;
+    const s = this.colorPicker.saturation;
+    const v = this.colorPicker.value;
+    const a = this.colorPicker.alpha;
+
+    const rgb = this.hsvToRgb(h, s, v);
+    const color = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${a})`;
+
+    // Update summary display
+    const summary = document.getElementById('adsFrameBgSummary');
+    if (summary) {
+      if (a === 0) {
+        summary.textContent = 'Transparent';
+        summary.style.background = 'transparent';
+      } else {
+        summary.textContent = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${a.toFixed(2)})`;
+        summary.style.background = color;
+        summary.style.padding = '2px 8px';
+        summary.style.borderRadius = '4px';
+        summary.style.border = '1px solid rgba(255,255,255,0.2)';
+      }
+    }
+
+    console.log('Background color:', color);
+
+    // Send real-time preview to overlay (don't save to state until "Save" is clicked)
+    messenger.send('ADS_BACKGROUND_CHANGED', { backgroundColor: color });
+  }
+
+  hsvToRgb(h, s, v) {
+    let r, g, b;
+
+    const i = Math.floor((h / 60) % 6);
+    const f = h / 60 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
+
+    switch (i) {
+      case 0: r = v; g = t; b = p; break;
+      case 1: r = q; g = v; b = p; break;
+      case 2: r = p; g = v; b = t; break;
+      case 3: r = p; g = q; b = v; break;
+      case 4: r = t; g = p; b = v; break;
+      case 5: r = v; g = p; b = q; break;
+    }
+
+    return {
+      r: Math.round(r * 255),
+      g: Math.round(g * 255),
+      b: Math.round(b * 255)
+    };
+  }
+
+  rgbToHsv(r, g, b) {
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+
+    let h = 0;
+    let s = max === 0 ? 0 : delta / max;
+    let v = max;
+
+    if (delta !== 0) {
+      if (max === r) {
+        h = 60 * (((g - b) / delta) % 6);
+      } else if (max === g) {
+        h = 60 * ((b - r) / delta + 2);
+      } else {
+        h = 60 * ((r - g) / delta + 4);
+      }
+    }
+
+    if (h < 0) h += 360;
+
+    return {
+      h: Math.round(h),
+      s: s,
+      v: v
+    };
   }
 
   // ============================================================================

@@ -466,7 +466,10 @@ class OverlayController {
     const raceInfoDiv = document.getElementById('raceInfo');
     if (raceInfoDiv) {
       // Use infoTab1, fall back to infoTab or raceInfo for legacy compatibility
-      const infoText = matchData.infoTab1 || matchData.infoTab || matchData.raceInfo || '';
+      // Check if infoTab1 exists in the object (even if empty) to avoid fallback to legacy fields
+      const infoText = 'infoTab1' in matchData
+        ? matchData.infoTab1
+        : (matchData.infoTab || matchData.raceInfo || '');
 
       if (infoText) {
         raceInfoDiv.textContent = infoText;
@@ -483,7 +486,10 @@ class OverlayController {
     const wagerInfoDiv = document.getElementById('wagerInfo');
     if (wagerInfoDiv) {
       // Use infoTab2, fall back to wagerInfo for legacy compatibility
-      const infoText = matchData.infoTab2 || matchData.wagerInfo || '';
+      // Check if infoTab2 exists in the object (even if empty) to avoid fallback to legacy fields
+      const infoText = 'infoTab2' in matchData
+        ? matchData.infoTab2
+        : (matchData.wagerInfo || '');
 
       if (infoText) {
         wagerInfoDiv.textContent = infoText;
@@ -581,7 +587,7 @@ class OverlayController {
    * @param {Object} state - Ball tracker state
    */
   updateBallTracker(state) {
-    console.log('🎱 OLD OverlayController.updateBallTracker called with state:', state);
+    console.log('🎱 OverlayController.updateBallTracker called with state:', state);
 
     if (!state) return;
 

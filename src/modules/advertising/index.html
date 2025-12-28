@@ -32,8 +32,11 @@ Premium Add-on for Advertisement Management
 		}
 
 		.ads-color-modal {
-			position: fixed;
-			inset: 0;
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
 			background: rgba(0, 0, 0, 0.6);
 			display: flex;
 			align-items: center;
@@ -46,9 +49,9 @@ Premium Add-on for Advertisement Management
 		}
 
 		.ads-color-modal__panel {
-			width: min(var(--panel-width, 320px), 100%);
-			max-width: var(--panel-width, 320px);
-			max-height: calc(100vh - 24px);
+			width: min(280px, calc(100% - 24px));
+			max-width: 280px;
+			max-height: calc(100% - 24px);
 			overflow: hidden;
 			display: flex;
 			flex-direction: column;
@@ -217,6 +220,24 @@ Premium Add-on for Advertisement Management
 			width: 54px;
 		}
 
+		.ads-dims-container {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+			align-items: flex-start;
+		}
+
+		.ads-dims-container--actual {
+			margin-left: auto;
+			align-items: flex-end;
+		}
+
+		.ads-dims-label {
+			font-size: 9px;
+			color: var(--text-secondary, #888);
+			opacity: 0.5;
+		}
+
 		.ads-dims {
 			font-size: 11px;
 			color: var(--text-secondary, #888);
@@ -227,10 +248,13 @@ Premium Add-on for Advertisement Management
 			font-size: 11px;
 			color: var(--text-secondary, #888);
 			white-space: nowrap;
-			margin-left: auto;
 		}
 
 		.ads-dims-actual:empty {
+			display: none;
+		}
+
+		.ads-dims-container--actual:has(.ads-dims-actual:empty) {
 			display: none;
 		}
 
@@ -508,8 +532,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adTop1Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x180</span>
-						<span class="ads-dims-actual" id="adTop1DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x180</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adTop1DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adTop1Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adTop1Img" src="" alt="">
@@ -538,8 +568,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adTop2Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x180</span>
-						<span class="ads-dims-actual" id="adTop2DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x180</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adTop2DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adTop2Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adTop2Img" src="" alt="">
@@ -568,8 +604,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adTop3Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x180</span>
-						<span class="ads-dims-actual" id="adTop3DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x180</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adTop3DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adTop3Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adTop3Img" src="" alt="">
@@ -598,8 +640,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adTop4Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x180</span>
-						<span class="ads-dims-actual" id="adTop4DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x180</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adTop4DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adTop4Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adTop4Img" src="" alt="">
@@ -628,8 +676,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adTop5Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x180</span>
-						<span class="ads-dims-actual" id="adTop5DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x180</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adTop5DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adTop5Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adTop5Img" src="" alt="">
@@ -658,8 +712,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adTop6Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x180</span>
-						<span class="ads-dims-actual" id="adTop6DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x180</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adTop6DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adTop6Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adTop6Img" src="" alt="">
@@ -689,8 +749,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adLeft1Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x360</span>
-						<span class="ads-dims-actual" id="adLeft1DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x360</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adLeft1DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adLeft1Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adLeft1Img" src="" alt="">
@@ -719,8 +785,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adLeft2Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x360</span>
-						<span class="ads-dims-actual" id="adLeft2DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x360</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adLeft2DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adLeft2Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adLeft2Img" src="" alt="">
@@ -749,8 +821,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adLeft3Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x360</span>
-						<span class="ads-dims-actual" id="adLeft3DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x360</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adLeft3DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adLeft3Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adLeft3Img" src="" alt="">
@@ -780,8 +858,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adRight1Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x360</span>
-						<span class="ads-dims-actual" id="adRight1DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x360</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adRight1DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adRight1Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adRight1Img" src="" alt="">
@@ -810,8 +894,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adRight2Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x360</span>
-						<span class="ads-dims-actual" id="adRight2DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x360</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adRight2DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adRight2Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adRight2Img" src="" alt="">
@@ -840,8 +930,14 @@ Premium Add-on for Advertisement Management
 							<input type="checkbox" class="smallSize" id="adRight3Show" checked>
 							<span>Show</span>
 						</label>
-						<span class="ads-dims">320x360</span>
-						<span class="ads-dims-actual" id="adRight3DimsActual"></span>
+						<div class="ads-dims-container">
+							<span class="ads-dims-label">expected</span>
+							<span class="ads-dims">320x360</span>
+						</div>
+						<div class="ads-dims-container ads-dims-container--actual">
+							<span class="ads-dims-label">actual</span>
+							<span class="ads-dims-actual" id="adRight3DimsActual"></span>
+						</div>
 						<div class="ad-preview noShow" id="adRight3Preview">
 							<div class="ad-preview__delete">X</div>
 							<img id="adRight3Img" src="" alt="">
@@ -998,8 +1094,8 @@ Premium Add-on for Advertisement Management
 					</div>
 					<div class="ads-color-row">
 						<div class="ads-color-row__label">Transparency</div>
-						<input type="range" id="adsColorAlpha" min="0" max="100" step="1" value="0">
-						<div id="adsColorAlphaLabel">0%</div>
+						<input type="range" id="adsColorAlpha" min="0" max="100" step="1" value="100">
+						<div id="adsColorAlphaLabel">100%</div>
 					</div>
 				</div>
 			</div>

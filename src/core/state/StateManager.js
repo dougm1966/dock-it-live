@@ -364,6 +364,23 @@ class StateManager {
   }
 
   /**
+   * Set logo slot metadata (span, frame, title, etc.)
+   * @param {string} slotId - Slot ID
+   * @param {Object} metadata - Metadata object (e.g., { span: 2, frame: true, title: 'Ad Title' })
+   */
+  async setLogoSlotMetadata(slotId, metadata) {
+    const updates = {};
+    for (const [key, value] of Object.entries(metadata)) {
+      updates[`logoSlots.${slotId}.${key}`] = value;
+    }
+
+    // Set all metadata properties at once
+    for (const [path, value] of Object.entries(updates)) {
+      await this.setValue(path, value);
+    }
+  }
+
+  /**
    * Clear logo from slot
    * @param {string} slotId - Slot ID
    */

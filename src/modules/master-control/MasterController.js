@@ -95,24 +95,20 @@ class MasterController {
 
     // Player 1 ranking (Fargo, ELO, etc.)
     document.getElementById('p1Ranking')?.addEventListener('change', async (e) => {
-      const rating = e.target.value;
+      const rating = e.target.value.trim();
       await stateManager.setPlayerFargo(1, rating);
       // Also set fargoInfo for overlay display
-      if (rating) {
-        await stateManager.setPlayerFargoInfo(1, rating);
-      }
-      console.log('✅ Player 1 ranking updated:', rating);
+      await stateManager.setPlayerFargoInfo(1, rating);
+      console.log('✅ Player 1 ranking updated:', rating || '(cleared)');
     });
 
     // Player 2 ranking (Fargo, ELO, etc.)
     document.getElementById('p2Ranking')?.addEventListener('change', async (e) => {
-      const rating = e.target.value;
+      const rating = e.target.value.trim();
       await stateManager.setPlayerFargo(2, rating);
       // Also set fargoInfo for overlay display
-      if (rating) {
-        await stateManager.setPlayerFargoInfo(2, rating);
-      }
-      console.log('✅ Player 2 ranking updated:', rating);
+      await stateManager.setPlayerFargoInfo(2, rating);
+      console.log('✅ Player 2 ranking updated:', rating || '(cleared)');
     });
 
     // Player 1 color (name plate background)
@@ -143,14 +139,16 @@ class MasterController {
 
     // Match Info Tab 1 (universal for all sports)
     document.getElementById('matchInfoTab1')?.addEventListener('change', async (e) => {
-      await stateManager.setMatchInfoTab1(e.target.value);
-      console.log('✅ Match info tab 1 updated:', e.target.value);
+      const value = e.target.value.trim();
+      await stateManager.setMatchInfoTab1(value || '');
+      console.log('✅ Match info tab 1 updated:', value || '(empty)');
     });
 
     // Match Info Tab 2 (universal for all sports)
     document.getElementById('matchInfoTab2')?.addEventListener('change', async (e) => {
-      await stateManager.setMatchInfoTab2(e.target.value);
-      console.log('✅ Match info tab 2 updated:', e.target.value);
+      const value = e.target.value.trim();
+      await stateManager.setMatchInfoTab2(value || '');
+      console.log('✅ Match info tab 2 updated:', value || '(empty)');
     });
 
     // Player 1 photo upload
@@ -416,10 +414,23 @@ class MasterController {
     });
 
     // Enable Advertising module
-    document.getElementById('enableAdvertisingChk')?.addEventListener('change', (e) => {
+    document.getElementById('enableAdvertisingChk')?.addEventListener('change', async (e) => {
       this.activeModules.advertising = e.target.checked;
-      console.log('Advertising module:', e.target.checked);
-      // TODO: Open advertising window or inject controls
+      console.log('✅ Advertising module:', e.target.checked);
+
+      // Save to state
+      await stateManager.setValue('modules.advertising.enabled', e.target.checked);
+      console.log('💾 Advertising module state saved');
+    });
+
+    // Enable Shot Clock module
+    document.getElementById('enableShotClockChk')?.addEventListener('change', async (e) => {
+      this.activeModules.shotClock = e.target.checked;
+      console.log('✅ Shot Clock module:', e.target.checked);
+
+      // Save to state
+      await stateManager.setValue('modules.shotClock.enabled', e.target.checked);
+      console.log('💾 Shot Clock module state saved');
     });
   }
 
@@ -973,6 +984,16 @@ class MasterController {
     const matchInfoTab2 = document.getElementById('matchInfoTab2');
     if (matchInfoTab1) matchInfoTab1.value = state.matchData.infoTab1 || '';
     if (matchInfoTab2) matchInfoTab2.value = state.matchData.infoTab2 || '';
+
+    // Update module enabled states
+    const enableAdvertisingChk = document.getElementById('enableAdvertisingChk');
+    const enableShotClockChk = document.getElementById('enableShotClockChk');
+    if (enableAdvertisingChk) {
+      enableAdvertisingChk.checked = state.modules?.advertising?.enabled || false;
+    }
+    if (enableShotClockChk) {
+      enableShotClockChk.checked = state.modules?.shotClock?.enabled || false;
+    }
 
     // NEW: Update overlay skin selector
     const skinSelect = document.getElementById('overlaySkinSelect');

@@ -1,0 +1,708 @@
+/*
+  Pro-Sleek Skin for Dock-It.live
+  Modern Broadcast Professional Design
+
+  Design Principles:
+  - Readability first: High contrast, clear typography
+  - Subtle refinement: Soft shadows, elegant borders
+  - Professional polish: Consistent spacing, refined details
+  - Restrained colors: Accent used sparingly
+
+  Color Palette:
+  - Primary: Charcoal #2a2d3a
+  - Accent: Refined Teal #00a8cc
+  - Neutrals: White #ffffff, Light Gray #f8f9fa
+*/
+
+/* ===== Color Variables ===== */
+:root {
+	/* Core colors */
+	--pro-charcoal: #2a2d3a;
+	--pro-charcoal-light: #3a3d4a;
+	--pro-teal: #00a8cc;
+	--pro-teal-dark: #007a99;
+
+	/* Neutrals */
+	--pro-white: #ffffff;
+	--pro-light-gray: #f8f9fa;
+	--pro-med-gray: #e9ecef;
+	--pro-dark-gray: #6c757d;
+
+	/* Status colors */
+	--pro-green: #28a745;
+	--pro-red: #dc3545;
+	--pro-yellow: #ffc107;
+
+	/* Shadows */
+	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+	--shadow-md: 0 2px 8px rgba(0, 0, 0, 0.15);
+	--shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+/* ===== Scale Variables ===== */
+:root {
+	--scale-zoom: 1.00;
+	--scale-transform: scale(1.00, 1.00);
+	--logo-left: 1025px;
+	--logo-right: 1025px;
+	--race-left: 155px;
+	--wager-right: 145px;
+	--slides-left: 1121px;
+	--player-name-font-size: 13pt;
+	--ext-padding: 6px;
+	--bs-mid-w: 72px;
+	--bs-mid-pad-x: 0px;
+	--bs-clock-w: 3.6ch;
+	--bs-inner-logo-shift: 0px;
+	--bs-split-transition: 0.3s;
+}
+
+html.scale-125,
+body.scale-125 {
+	--scale-zoom: 1.25;
+	--scale-transform: scale(1.25, 1.25);
+	--logo-left: 823px;
+	--logo-right: 823px;
+	--race-left: 130px;
+	--wager-right: 120px;
+	--slides-left: 900px;
+	--ext-padding: 6px;
+}
+
+html.scale-150,
+body.scale-150 {
+	--scale-zoom: 1.50;
+	--scale-transform: scale(1.50, 1.50);
+	--logo-left: 690px;
+	--logo-right: 690px;
+	--race-left: 110px;
+	--wager-right: 100px;
+	--slides-left: 754px;
+	--ext-padding: 5.55px;
+}
+
+html.scale-200,
+body.scale-200 {
+	--scale-zoom: 2.00;
+	--scale-transform: scale(2.00, 2.00);
+	--logo-left: 525px;
+	--logo-right: 525px;
+	--race-left:40px;
+	--wager-right: 40px;
+	--slides-left: 573px;
+	--slides-bottom: 13.75px;
+	--player-name-font-size: 12pt;
+	--ext-padding: 5.55px;
+}
+
+/* ===== Base Styles ===== */
+body {
+	background-color: rgba(0, 0, 0, 0);
+	margin: 0px auto;
+	overflow: hidden;
+	transform: none;
+	-moz-transform: var(--scale-transform);
+	zoom: var(--scale-zoom);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+#scoreBoardDiv {
+	position: absolute;
+	bottom: 0px;
+	width: 95%;
+	max-width: 1200px;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 2px;
+	z-index: 1;
+	height: auto;
+}
+
+#scoreBoardDiv.clock-visible {
+	--bs-mid-w: 112px;
+	--bs-inner-logo-shift: 0px;
+}
+
+/* ===== Table Cells - Clean & Professional ===== */
+td {
+	border: 1px solid var(--pro-med-gray);
+	border-radius: 4px;
+	vertical-align: middle;
+	padding: 0;
+	box-shadow: var(--shadow-sm);
+	transition: box-shadow 0.2s ease;
+}
+
+#scoreBoard {
+	width: 95%;
+	margin: auto;
+	table-layout: fixed;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+#scoreBoard col.bs-col-left,
+#scoreBoard col.bs-col-right {
+	width: calc((100% - var(--bs-mid-w)) / 2);
+	transition: width var(--bs-split-transition) ease;
+}
+
+#scoreBoard col.bs-col-mid {
+	width: var(--bs-mid-w);
+	transition: width var(--bs-split-transition) ease;
+}
+
+/* ===== Score Pills - Maximum Readability ===== */
+.bs-score-cell {
+	border: none !important;
+	background: transparent !important;
+	padding: 0 !important;
+	text-align: center;
+	width: 40px;
+	min-width: 40px;
+	max-width: 40px;
+}
+
+.bs-score-cluster {
+	border: none !important;
+	background: transparent !important;
+	padding: 0 var(--bs-mid-pad-x) !important;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 3px;
+	width: var(--bs-mid-w);
+	min-width: var(--bs-mid-w);
+	max-width: var(--bs-mid-w);
+	box-sizing: border-box;
+	transition: all var(--bs-split-transition) ease;
+}
+
+.bs-score-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.4ch;
+	min-width: 2.4ch;
+	padding: 0 0.2ch;
+	height: 100%;
+	/* Clean white background */
+	background: var(--pro-white);
+	border: 1px solid var(--pro-dark-gray);
+	border-radius: 6px;
+	/* Subtle shadow for depth */
+	box-shadow: var(--shadow-sm);
+	/* Dark text for maximum contrast */
+	color: var(--pro-charcoal);
+	text-shadow: none;
+	font-size: 13pt;
+	font-weight: 700;
+	letter-spacing: -0.5px;
+	box-sizing: border-box;
+	margin: 0;
+	transition: all 0.2s ease;
+}
+
+.bs-score-pill:hover {
+	box-shadow: var(--shadow-md);
+}
+
+/* Subtle pulse when score changes */
+@keyframes scorePulse {
+	0% { transform: scale(1); }
+	50% { transform: scale(1.08); box-shadow: var(--shadow-md); }
+	100% { transform: scale(1); }
+}
+
+.score-changed {
+	animation: scorePulse 0.3s ease;
+}
+
+.noShow {
+	visibility: hidden;
+}
+
+/* ===== Player Names - Refined Gradients ===== */
+#player1Name,
+#player2Name {
+	font-size: var(--player-name-font-size);
+	font-weight: 600;
+	text-align: center;
+	vertical-align: middle;
+	position: relative;
+	overflow: hidden;
+	/* Clean white text */
+	color: var(--pro-white);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	letter-spacing: 0.3px;
+	border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Player 1: Subtle charcoal to teal gradient */
+#player1Name {
+	background: linear-gradient(to right,
+	                            var(--pro-charcoal) 0%,
+	                            var(--pro-charcoal-light) 70%,
+	                            var(--pro-teal-dark) 100%);
+	box-shadow: var(--shadow-md);
+}
+
+/* Player 2: Mirrored gradient */
+#player2Name {
+	background: linear-gradient(to left,
+	                            var(--pro-charcoal) 0%,
+	                            var(--pro-charcoal-light) 70%,
+	                            var(--pro-teal-dark) 100%);
+	box-shadow: var(--shadow-md);
+}
+
+/* ===== Shot Clock - Clean & Visible ===== */
+#shotClock {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: auto;
+	min-width: var(--bs-clock-w);
+	padding: 2px 5px;
+	height: 100%;
+	/* Clean green background */
+	background: var(--pro-green);
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	border-radius: 6px;
+	box-shadow: var(--shadow-sm);
+	/* White text with subtle shadow */
+	color: var(--pro-white);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+	font-size: 12pt;
+	font-weight: 700;
+	line-height: 1;
+	box-sizing: border-box;
+	margin: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	transition: all var(--bs-split-transition) ease;
+}
+
+#shotClock.fadeOutElm {
+	width: 0px;
+	min-width: 0px;
+	padding-left: 0;
+	padding-right: 0;
+	border-width: 0;
+}
+
+#shotClock.shotRed {
+	background: var(--pro-red);
+}
+
+/* ===== Ball Tracker - Refined Background ===== */
+:root {
+	--bt-ball-size: 14px;
+	--bt-rack-bg: rgba(248, 249, 250, 0.95);
+	--bt-rack-radius: calc((var(--bt-ball-size) / 2) + 6px);
+	--bt-rack-pad-x: 02px;
+	--bt-rack-pad-y: 02px;
+}
+
+.bt-rack {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 2px;
+	margin-top: 2px;
+	background: var(--bt-rack-bg);
+	border-radius: 0;
+	border: 1px solid var(--pro-med-gray);
+	padding: 2px var(--bt-rack-pad-x) var(--bt-rack-pad-y);
+	width: fit-content;
+	max-width: 100%;
+	box-sizing: border-box;
+	box-shadow: var(--shadow-sm);
+}
+
+.bt-rack--mid {
+	justify-content: center;
+	border-radius: 0;
+	padding-left: 0;
+	padding-right: 0;
+	width: 100%;
+}
+
+.bt-ball {
+	width: var(--bt-ball-size);
+	height: var(--bt-ball-size);
+	display: inline-block;
+	transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.bt-ball--placeholder {
+	opacity: 0.3;
+}
+
+.bt-ball--pocketed {
+	opacity: 0.4;
+	filter: grayscale(0.5);
+}
+
+tr.bt-row td.bt-cell {
+	border: none;
+	background: transparent;
+	padding: 0;
+}
+
+tr.bt-row td.bt-cell--mid {
+	padding: 0;
+}
+
+tr.bt-row td.bt-cell:first-child .bt-rack {
+	justify-content: flex-end;
+	margin-left: auto;
+	border-radius: var(--bt-rack-radius) 0 0 var(--bt-rack-radius);
+	padding-right: 0;
+}
+
+tr.bt-row td.bt-cell:last-child .bt-rack {
+	justify-content: flex-start;
+	margin-right: auto;
+	border-radius: 0 var(--bt-rack-radius) var(--bt-rack-radius) 0;
+	padding-left: 0;
+}
+
+/* ===== Name Centering ===== */
+#player1Name {
+	--p1-ex: 0px;
+	--p1-photo: 0px;
+	--p1-logo: 0px;
+}
+
+#player2Name {
+	--p2-ex: 0px;
+	--p2-photo: 0px;
+	--p2-logo: 0px;
+}
+
+#player1Name.clock-enabled { --p1-ex: 28px; }
+#player2Name.clock-enabled { --p2-ex: 28px; }
+#player1Name.has-photo { --p1-photo: 28px; }
+#player2Name.has-photo { --p2-photo: 28px; }
+#player1Name.has-left-sponsor-logo { --p1-logo: 96px; }
+#player2Name.has-right-sponsor-logo { --p2-logo: 96px; }
+
+#player1Name .playerNameText {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	padding-left: calc(3px + var(--p1-ex) + var(--p1-photo));
+	padding-right: calc(3px + var(--p1-logo));
+	box-sizing: border-box;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#player2Name .playerNameText {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	padding-left: calc(3px + var(--p2-logo));
+	padding-right: calc(3px + var(--p2-ex) + var(--p2-photo));
+	box-sizing: border-box;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* ===== Extension Icons - Clean Design ===== */
+#p1ExtIcon,
+#p2ExtIcon {
+	position: absolute;
+	background: var(--pro-green);
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	color: var(--pro-white);
+	font-size: 11px;
+	line-height: 1;
+	font-weight: 600;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+	padding: 0;
+	z-index: 10;
+	top: -1px;
+	bottom: -1px;
+	height: calc(100% + 2px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	box-sizing: border-box;
+	box-shadow: var(--shadow-sm);
+}
+
+#p1ExtIcon {
+	left: -1px;
+	border-radius: 7px 0px 0px 7px;
+	border-right: none;
+}
+
+#p2ExtIcon {
+	right: -1px;
+	border-radius: 0px 7px 7px 0px;
+	border-left: none;
+}
+
+/* ===== Utility Classes ===== */
+.greenBtn {
+	background: var(--pro-green);
+	color: white;
+}
+
+.redBtn {
+	background: var(--pro-red);
+	color: white;
+}
+
+.shotRed {
+	color: white;
+}
+
+/* ===== Smooth Animations ===== */
+.fadeInElm {
+	visibility: visible;
+	opacity: 1;
+	transition: opacity 0.5s ease;
+}
+
+.fadeOutElm {
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 0s 0.5s, opacity 0.5s ease;
+}
+
+/* ===== Blink Animations ===== */
+@keyframes blinking {
+	0% { background-color: var(--pro-white); }
+	100% { background-color: var(--pro-green); }
+}
+
+.winBlink {
+	animation: blinking 0.12s 4;
+}
+
+@keyframes extblinking {
+	0% { background-color: var(--pro-green); }
+	100% { background-color: var(--pro-red); }
+}
+
+.extBlink {
+	animation: extblinking 0.12s 3;
+}
+
+/* ===== Logos - Subtle Styling ===== */
+.bs-logo {
+	position: absolute;
+	z-index: 9;
+	top: 50%;
+	transform: translateY(-50%);
+	max-width: 90px;
+	max-height: 18px;
+	width: auto;
+	height: 18px;
+	opacity: 0.95;
+	transition: opacity 0.2s ease;
+}
+
+.bs-logo:hover {
+	opacity: 1;
+}
+
+.bs-logo-left {
+	right: calc(8px + var(--bs-inner-logo-shift));
+	transition: right var(--bs-split-transition) ease;
+}
+
+.bs-logo-right {
+	left: calc(8px + var(--bs-inner-logo-shift));
+	transition: left var(--bs-split-transition) ease;
+}
+
+/* ===== Player Photos ===== */
+.playerPhoto {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	object-fit: cover;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	display: none;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	box-shadow: var(--shadow-sm);
+}
+
+#player1-photo {
+	left: 3px;
+	transition: left 0.3s ease;
+	transition-delay: 0.8s;
+}
+
+#player2-photo {
+	right: 3px;
+	transition: right 0.3s ease;
+	transition-delay: 0.8s;
+}
+
+.playerPhoto.photoVisible {
+	display: block;
+}
+
+#player1-photo.clockActive {
+	left: 31px;
+	transition-delay: 0s;
+}
+
+#player2-photo.clockActive {
+	right: 31px;
+	transition-delay: 0s;
+}
+
+/* ===== Race & Wager Info - Clean Tabs ===== */
+#raceInfo,
+#wagerInfo {
+	position: absolute;
+	top: 0;
+	width: fit-content;
+	min-width: 80px;
+	max-width: 320px;
+	border-radius: 6px 6px 0px 0px;
+	text-align: center;
+	padding: 2px 10px 4px;
+	font-size: 8pt;
+	font-weight: 700;
+	letter-spacing: 0.3px;
+	border: 1px solid var(--pro-med-gray);
+	border-bottom: none;
+	color: var(--pro-charcoal);
+	background: var(--pro-light-gray);
+	z-index: 2;
+	box-shadow: var(--shadow-sm);
+}
+
+#raceInfo {
+	left: var(--race-left);
+	border-bottom-left-radius: 0;
+}
+
+#wagerInfo {
+	right: var(--wager-right);
+	border-bottom-right-radius: 0;
+}
+
+tr.bt-full-row td.bt-cell {
+	border: none;
+	background: transparent;
+	padding: 0;
+	text-align: center;
+}
+
+.bt-rack--full {
+	justify-content: center;
+	flex-wrap: nowrap;
+	gap: 2px;
+	border-radius: var(--bt-rack-radius);
+	width: fit-content;
+	margin: 0 auto;
+	max-width: 100%;
+}
+
+/* ===== Shot Clock Progress Bar ===== */
+.shotclockvis {
+	position: absolute;
+	width: 90%;
+	left: 5%;
+	bottom: 3px;
+	height: 3px;
+	background: transparent;
+	border-radius: 2px;
+}
+
+.startTimer {
+	width: 0px;
+	background: var(--pro-teal);
+	box-shadow: 0 0 4px var(--pro-teal);
+	transition: width 30s;
+	transition-timing-function: linear;
+}
+
+.start60 {
+	width: 0px;
+	background: var(--pro-teal);
+	box-shadow: 0 0 4px var(--pro-teal);
+	transition-property: width;
+	transition-duration: 60s;
+	transition-timing-function: linear;
+}
+
+/* ===== Logo Slideshow ===== */
+.mySlides {
+	position: fixed;
+	display: none;
+	bottom: var(--slides-bottom, 14px);
+	left: var(--slides-left);
+}
+
+.slideshow-container {
+	position: relative;
+	margin: auto;
+}
+
+.fade {
+	animation-name: fade;
+	animation-duration: 1s;
+}
+
+@keyframes fade {
+	from { opacity: 0.5; }
+	to { opacity: 1; }
+}
+
+.logoSlide {
+	display: none;
+}
+
+/* ===== Component Containers ===== */
+.bs-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.bs-game-info {
+	display: block;
+	position: relative;
+	height: 18px;
+}
+
+.bs-scoreboard {
+	display: block;
+}
+
+.bs-score-table {
+	width: 100%;
+}
+
+.playerNameText {
+	display: inline-block;
+}
+
+/* ===== Accessibility ===== */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
