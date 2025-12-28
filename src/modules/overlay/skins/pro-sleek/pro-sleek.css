@@ -300,7 +300,7 @@ td {
 /* ===== Ball Tracker - Refined Background ===== */
 :root {
 	--bt-ball-size: 14px;
-	--bt-rack-bg: rgba(248, 249, 250, 0.95);
+	--bt-rack-bg: transparent;
 	--bt-rack-radius: calc((var(--bt-ball-size) / 2) + 6px);
 	--bt-rack-pad-x: 02px;
 	--bt-rack-pad-y: 02px;
@@ -314,12 +314,12 @@ td {
 	margin-top: 2px;
 	background: var(--bt-rack-bg);
 	border-radius: 0;
-	border: 1px solid var(--pro-med-gray);
+	border: none;
 	padding: 2px var(--bt-rack-pad-x) var(--bt-rack-pad-y);
 	width: fit-content;
 	max-width: 100%;
 	box-sizing: border-box;
-	box-shadow: var(--shadow-sm);
+	box-shadow: none;
 }
 
 .bt-rack--mid {

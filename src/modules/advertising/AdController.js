@@ -155,7 +155,63 @@ class AdController {
     await this.renderLeftZone(state);
     await this.renderRightZone(state);
 
+    // Hide slots that are covered by spans
+    this.hideCoveredSlots(state);
+
     console.log('✅ All ad slots rendered');
+  }
+
+  /**
+   * Hide slots that are covered by spans to prevent grid overlap
+   */
+  hideCoveredSlots(state) {
+    const regions = [
+      { letter: 'T', count: 6 },
+      { letter: 'L', count: 3 },
+      { letter: 'R', count: 3 }
+    ];
+
+    for (const region of regions) {
+      // Track which slots should be hidden
+      const shouldHide = new Array(region.count + 1).fill(false);
+
+      // Find slots with spans and mark covered slots for hiding
+      for (let i = 1; i <= region.count; i++) {
+        const slotId = `${region.letter}${i}`;
+        const slotData = state.logoSlots?.[slotId];
+        const span = Math.max(1, Math.min(3, parseInt(slotData?.span) || 1));
+        const isActive = slotData && slotData.active && slotData.assetId;
+
+        if (isActive && span > 1) {
+          // For side panels with span 3, hide all other slots
+          if (region.count === 3 && span === 3) {
+            for (let j = 1; j <= region.count; j++) {
+              if (j !== i) {
+                shouldHide[j] = true;
+              }
+            }
+          } else {
+            // Normal spanning: hide subsequent slots
+            for (let j = i + 1; j < i + span && j <= region.count; j++) {
+              shouldHide[j] = true;
+            }
+          }
+        }
+      }
+
+      // Apply visibility changes
+      for (let i = 1; i <= region.count; i++) {
+        const slotId = `${region.letter}${i}`;
+        const slotEl = document.querySelector(`[data-slot="${slotId}"]`);
+        if (slotEl) {
+          if (shouldHide[i]) {
+            slotEl.style.display = 'none';
+          } else {
+            slotEl.style.display = '';
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -282,7 +338,12 @@ class AdController {
       slotEl.style.gridRow = '';
     } else {
       // Left/Right zones: span rows
-      slotEl.style.gridRow = `span ${span}`;
+      // For side panels with span 3, always start at row 1 to cover all 3 slots
+      if (span === 3) {
+        slotEl.style.gridRow = '1 / span 3'; // Start at row 1, span all 3 rows
+      } else {
+        slotEl.style.gridRow = `span ${span}`;
+      }
       slotEl.style.gridColumn = '';
     }
 
@@ -345,6 +406,13 @@ class AdController {
             img.style.flex = '1 1 auto';
           } else {
             img.style.height = '100%';
+          }
+
+          // Add frame border if enabled
+          if (slotData.frame) {
+            img.style.border = '2px solid rgba(255, 255, 255, 0.8)';
+            img.style.boxSizing = 'border-box';
+            img.style.padding = '4px';
           }
 
           img.addEventListener('error', () => {

@@ -416,16 +416,7 @@ body {
 .bt-ball {
   width: 24px;
   height: 24px;
-  border: 2px solid var(--sharp-blue);
-  border-radius: 0; /* SHARP SQUARES instead of circles */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9pt;
-  font-weight: 700;
-  color: var(--sharp-white);
-  background: var(--sharp-dark-gray);
-  box-shadow: 0 0 8px rgba(0, 153, 255, 0.3);
+  display: inline-block;
 }
 
 .bt-ball.sunk {

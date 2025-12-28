@@ -459,10 +459,10 @@ class AdvertisingController {
     console.log(`✅ Span set to ${validSpan} for ${slotId}`);
   }
 
-  setAdFrame(slotId, hasFrame) {
-    console.log(`Ad ${slotId} frame:`, hasFrame);
-    // TODO: Store frame setting in logo slot metadata
-    // await stateManager.setLogoSlotMetadata(slotId, { frame: hasFrame });
+  async setAdFrame(slotId, hasFrame) {
+    console.log(`🖼️ Ad ${slotId} frame:`, hasFrame);
+    await stateManager.setLogoSlotMetadata(slotId, { frame: hasFrame });
+    messenger.send('LOGO_SLOT_CHANGED', { slotId, frame: hasFrame });
   }
 
   setAdShow(slotId, show) {
@@ -506,12 +506,42 @@ class AdvertisingController {
   async recalculateRegionBlocking(regionName) {
     const maxSlots = regionName === 'top' ? 6 : 3;
     const regionLetter = regionName === 'top' ? 'T' : regionName === 'left' ? 'L' : 'R';
+    const isSidePanel = maxSlots === 3; // Left or right panel
 
     // Get all spans for this region from state
     const state = await stateManager.getState();
     const covered = new Array(maxSlots + 1).fill(false);
 
-    // Calculate which positions are covered by spans
+    // For side panels with span 3, check if any slot has span 3
+    let hasFullSpan = false;
+    let fullSpanSlot = null;
+    if (isSidePanel) {
+      for (let i = 1; i <= maxSlots; i++) {
+        const slotId = `${regionLetter}${i}`;
+        const slotData = state?.logoSlots?.[slotId];
+        const span = Math.max(1, Math.min(3, parseInt(slotData?.span) || 1));
+        const isActive = slotData?.active !== false;
+        if (isActive && span === 3) {
+          hasFullSpan = true;
+          fullSpanSlot = i;
+          break;
+        }
+      }
+    }
+
+    // If side panel has a slot with span 3, block all other slots
+    if (hasFullSpan) {
+      for (let i = 1; i <= maxSlots; i++) {
+        if (i === fullSpanSlot) {
+          this.setSlotBlocked(regionName, i, false); // Anchor slot is not blocked
+        } else {
+          this.setSlotBlocked(regionName, i, true); // All other slots blocked
+        }
+      }
+      return;
+    }
+
+    // Calculate which positions are covered by spans (normal logic)
     for (let i = 1; i <= maxSlots; i++) {
       const slotId = `${regionLetter}${i}`;
       const slotData = state?.logoSlots?.[slotId];
@@ -662,7 +692,8 @@ class AdvertisingController {
           const hueSlider = document.getElementById('adsColorHue');
           const alphaSlider = document.getElementById('adsColorAlpha');
           if (hueSlider) hueSlider.value = hsv.h;
-          if (alphaSlider) alphaSlider.value = Math.round(a * 100);
+          // Invert alpha to transparency (alpha 1.0 = 0% transparency, alpha 0.0 = 100% transparency)
+          if (alphaSlider) alphaSlider.value = Math.round((1 - a) * 100);
 
           // Redraw canvas and update display
           this.drawColorCanvas();
@@ -866,11 +897,11 @@ class AdvertisingController {
       this.colorPicker.hue = parseInt(hueSlider.value);
     }
 
-    // Update alpha from slider
+    // Update alpha from slider (invert: 0% transparency = 1.0 alpha, 100% transparency = 0.0 alpha)
     const alphaSlider = document.getElementById('adsColorAlpha');
     const alphaLabel = document.getElementById('adsColorAlphaLabel');
     if (alphaSlider) {
-      this.colorPicker.alpha = parseInt(alphaSlider.value) / 100;
+      this.colorPicker.alpha = 1 - (parseInt(alphaSlider.value) / 100);
       if (alphaLabel) {
         alphaLabel.textContent = `${alphaSlider.value}%`;
       }
@@ -1220,6 +1251,12 @@ class AdvertisingController {
         const spanSelect = document.getElementById(`${prefix}Span`);
         if (spanSelect && slotData?.span) {
           spanSelect.value = slotData.span;
+        }
+
+        // Update frame checkbox
+        const frameCheckbox = document.getElementById(`${prefix}Frame`);
+        if (frameCheckbox) {
+          frameCheckbox.checked = slotData?.frame || false;
         }
 
         // Update show checkbox
