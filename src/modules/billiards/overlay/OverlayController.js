@@ -788,7 +788,7 @@ class OverlayController {
       img.alt = n;
 
       // OBS COMPATIBILITY: Use relative path for file:// protocol
-      img.src = `/PCLS-Balls/images/render0/${n}.png`;
+      img.src = `../assets/balls/render0/${n}.png`;
 
       const isPocketed = !!pocketed[String(n)];
       if (options && options.placeholder) {
