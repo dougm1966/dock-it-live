@@ -1,0 +1,57 @@
+/*
+  Shot Clock Display CSS
+  PCPL ScoreBoard - Large shot clock display for player viewing
+  Inspired by g4ScoreBoard concept
+  GitHub: https://github.com/dougm1966/g4ScoreBoard
+  Park County Pool League
+*/
+
+body {
+	background: rgba(0, 0, 0, 0);
+	font-size: 600pt;
+	font-family: Tahoma, sans-serif;
+	font-weight: bolder;
+	text-align: center;
+	vertical-align: middle;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+/* Clock Display States */
+.clock-display {
+	display: block;
+	width: 100%;
+	height: 100vh;
+	line-height: 100vh;
+}
+
+/* Color States (applied via JavaScript) */
+.clock-green {
+	background: darkgreen;
+	color: black;
+}
+
+.clock-orange {
+	background: orange;
+	color: black;
+}
+
+.clock-yellow {
+	background: yellow;
+	color: black;
+}
+
+.clock-tomato {
+	background: tomato;
+	color: black;
+}
+
+.clock-red {
+	background: red;
+	color: white;
+}
+
+.clock-hidden {
+	background: rgba(0, 0, 0, 0);
+}

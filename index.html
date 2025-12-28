@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dock-It.live - Dev Testing</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+      }
+      h1 {
+        color: #4ec9b0;
+      }
+      .link-card {
+        background: #252526;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 8px;
+        border-left: 4px solid #007acc;
+      }
+      .link-card h2 {
+        margin: 0 0 10px 0;
+        color: #9cdcfe;
+      }
+      .link-card p {
+        margin: 5px 0;
+        color: #858585;
+      }
+      a {
+        color: #4ec9b0;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      code {
+        background: #1e1e1e;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #ce9178;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🚀 Dock-It.live Development</h1>
+    <p>Phase 1: Universal Core - Database Migration & Testing</p>
+
+    <div class="link-card" style="border-left-color: #10b981;">
+      <h2>🎮 Control Panel</h2>
+      <p>Manage match state, upload logos, control the scoreboard</p>
+      <p><a href="/control-panel.html">→ Open Control Panel</a></p>
+    </div>
+
+    <div class="link-card" style="border-left-color: #10b981;">
+      <h2>📺 Main Overlay</h2>
+      <p>Full 1080p scoreboard overlay for OBS Studio</p>
+      <p><a href="/overlay.html">→ Open Overlay</a></p>
+      <p style="font-size: 12px; color: #858585;">Transparent background, reactive state updates</p>
+    </div>
+
+    <div class="link-card">
+      <h2>🕐 Shot Clock Test (NEW!)</h2>
+      <p>Test shot clock controls - Enable/disable, start/stop, change duration, test warnings</p>
+      <p><a href="/test-shot-clock.html">→ Test Shot Clock Controls</a></p>
+      <p style="font-size: 12px; color: #858585;">Open /shot-clock.html in another window to see live updates!</p>
+    </div>
+
+    <div class="link-card">
+      <h2>🕐 Shot Clock Display</h2>
+      <p>Reactive shot clock display - Auto-updates from StateManager, visual warnings at 10s/5s</p>
+      <p><a href="/shot-clock.html">→ View Shot Clock Display</a></p>
+      <p style="font-size: 12px; color: #858585;">Press D to toggle debug panel</p>
+    </div>
+
+    <div class="link-card">
+      <h2>🔍 Asset Database Inspector</h2>
+      <p>View and inspect all uploaded assets in dock_it_db - See images, metadata, and raw data</p>
+      <p><a href="/check-assets.html">→ Inspect Assets Database</a></p>
+    </div>
+
+    <div class="link-card">
+      <h2>📡 Cross-Window Messaging Test</h2>
+      <p>Test BroadcastChannel communication - Open in 2 windows and watch them sync!</p>
+      <p><a href="/test-messaging.html">→ Test BroadcastChannel Messaging</a></p>
+    </div>
+
+    <div class="link-card">
+      <h2>🔄 Reactive State Test</h2>
+      <p>Test the reactive database-first state pattern with live scoreboard</p>
+      <p><a href="/test-reactive-state.html">→ Test Reactive State Manager</a></p>
+    </div>
+
+    <div class="link-card">
+      <h2>DexieWrapper Verification</h2>
+      <p>Test the Dexie.js wrapper with new <code>dock_it_db</code> database</p>
+      <p><a href="/test-dexie.html">→ Run Database Verification</a></p>
+    </div>
+
+    <div class="link-card">
+      <h2>Quick Console Test</h2>
+      <p>Open browser DevTools (F12) and run:</p>
+      <pre><code>import('/src/core/state/StateManager.js').then(m => m.stateManager.init())</code></pre>
+    </div>
+
+    <div class="link-card">
+      <h2>Manual Database Inspection</h2>
+      <p>Open DevTools → Application → IndexedDB → <code>dock_it_db</code></p>
+      <p>Watch tables update in real-time: <code>assets</code>, <code>match_state</code></p>
+    </div>
+
+    <script>
+      console.log('📦 Dock-It.live Dev Environment');
+      console.log('Phase 1: Database wrapper ready for testing');
+      console.log('');
+      console.log('Quick test:');
+      console.log("  import('/src/core/database/verify.js').then(m => m.verifyDexieWrapper())");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scoreholio Bridge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: transparent;
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body class="text-gray-800">
+  <div class="max-w-2xl mx-auto">
+    <h2 class="text-xl font-bold mb-4 text-gray-700">Scoreholio Bridge</h2>
+
+    <!-- Connection Status -->
+    <div id="status" class="mb-4 p-3 rounded-lg bg-gray-100 text-sm">
+      <span class="font-semibold">Status:</span>
+      <span id="statusText" class="ml-2">Not connected</span>
+    </div>
+
+    <!-- URL Input -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium mb-2" for="scoreholioUrl">
+        Scoreholio Court URL
+      </label>
+      <input
+        type="text"
+        id="scoreholioUrl"
+        placeholder="https://scoreholio.com/court/..."
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      />
+    </div>
+
+    <!-- Controls -->
+    <div class="flex gap-2 mb-4">
+      <button
+        id="connectBtn"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+      >
+        Connect
+      </button>
+      <button
+        id="disconnectBtn"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+        disabled
+      >
+        Disconnect
+      </button>
+      <button
+        id="testFetchBtn"
+        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+      >
+        Test Fetch
+      </button>
+    </div>
+
+    <!-- Settings -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium mb-2" for="pollingFrequency">
+        Polling Frequency (seconds)
+      </label>
+      <input
+        type="number"
+        id="pollingFrequency"
+        value="5"
+        min="1"
+        max="60"
+        class="w-32 px-3 py-2 border border-gray-300 rounded-lg"
+      />
+    </div>
+
+    <!-- Debug Info -->
+    <div class="mb-4">
+      <h3 class="text-sm font-semibold mb-2">Debug Info</h3>
+      <div id="debugInfo" class="p-3 bg-gray-900 text-green-400 rounded-lg text-xs font-mono overflow-auto max-h-48">
+        Waiting for connection...
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+      <h3 class="font-semibold mb-2">How to use:</h3>
+      <ol class="list-decimal list-inside space-y-1">
+        <li>Enter a Scoreholio court URL (e.g., https://scoreholio.com/court/abc123)</li>
+        <li>Click "Connect" to start syncing data</li>
+        <li>The bridge will automatically update player names and scores</li>
+        <li>Use "Test Fetch" to manually trigger a data fetch</li>
+      </ol>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ScoreholioBridgeController } from './BridgeController.js';
+
+    let bridge;
+
+    // Initialize bridge
+    async function init() {
+      bridge = new ScoreholioBridgeController();
+      await bridge.init();
+
+      log('Bridge initialized');
+
+      // Load saved URL if available
+      const status = bridge.getStatus();
+      if (status.url) {
+        document.getElementById('scoreholioUrl').value = status.url;
+      }
+    }
+
+    // Event listeners
+    document.getElementById('connectBtn').addEventListener('click', async () => {
+      const url = document.getElementById('scoreholioUrl').value.trim();
+
+      if (!url) {
+        alert('Please enter a Scoreholio URL');
+        return;
+      }
+
+      try {
+        setConnecting(true);
+        const result = await bridge.connect(url);
+        log(result.message);
+        updateUI();
+      } catch (error) {
+        log('Error: ' + error.message, 'error');
+        setConnecting(false);
+      }
+    });
+
+    document.getElementById('disconnectBtn').addEventListener('click', async () => {
+      try {
+        const result = await bridge.disconnect();
+        log(result.message);
+        updateUI();
+      } catch (error) {
+        log('Error: ' + error.message, 'error');
+      }
+    });
+
+    document.getElementById('testFetchBtn').addEventListener('click', async () => {
+      try {
+        log('Manually fetching data...');
+        await bridge.fetchAndSync();
+      } catch (error) {
+        log('Error: ' + error.message, 'error');
+      }
+    });
+
+    document.getElementById('pollingFrequency').addEventListener('change', (e) => {
+      const seconds = parseInt(e.target.value, 10);
+      bridge.setPollingFrequency(seconds * 1000);
+      log(`Polling frequency set to ${seconds} seconds`);
+    });
+
+    // UI helpers
+    function updateUI() {
+      const status = bridge.getStatus();
+
+      document.getElementById('connectBtn').disabled = status.connected;
+      document.getElementById('disconnectBtn').disabled = !status.connected;
+
+      const statusEl = document.getElementById('status');
+      const statusTextEl = document.getElementById('statusText');
+
+      if (status.connected) {
+        statusEl.className = 'mb-4 p-3 rounded-lg bg-green-100 text-sm';
+        statusTextEl.textContent = `Connected to ${status.url}`;
+      } else {
+        statusEl.className = 'mb-4 p-3 rounded-lg bg-gray-100 text-sm';
+        statusTextEl.textContent = 'Not connected';
+      }
+    }
+
+    function setConnecting(connecting) {
+      document.getElementById('connectBtn').disabled = connecting;
+      document.getElementById('connectBtn').textContent = connecting ? 'Connecting...' : 'Connect';
+    }
+
+    function log(message, type = 'info') {
+      const debugEl = document.getElementById('debugInfo');
+      const timestamp = new Date().toLocaleTimeString();
+      const color = type === 'error' ? 'text-red-400' : 'text-green-400';
+
+      debugEl.innerHTML += `<div class="${color}">[${timestamp}] ${message}</div>`;
+      debugEl.scrollTop = debugEl.scrollHeight;
+    }
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>

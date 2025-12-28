@@ -1,0 +1,68 @@
+/* ==========================================================================
+   g4ScoreBoard Control Panel - Required CSS (Legacy Compatibility)
+   This file provides backward compatibility and overrides for existing JS
+   ========================================================================== */
+
+/* ===== Hidden File Inputs ===== */
+#FileUploadL0, #FileUploadL1, #FileUploadL2, #FileUploadL3, #FileUploadL4,
+#FileUploadP1Photo, #FileUploadP2Photo {
+	display: none;
+}
+
+/* ===== Legacy Visibility Class ===== */
+.noShow {
+	visibility: hidden;
+	display: none !important;
+}
+
+/* ===== Clock Display Font Weight ===== */
+#clockLocalDisplay {
+	font-weight: bolder;
+}
+
+/* ===== Checkbox Size (Legacy) ===== */
+input.smallSize {
+	height: 14px;
+	width: 14px;
+	accent-color: var(--accent-primary);
+}
+
+/* ===== HR Styling ===== */
+hr {
+	border-top: 1px solid var(--border-color, #3d4450);
+	border-bottom: 0;
+	border-left: 0;
+	border-right: 0;
+	margin: var(--spacing-sm, 8px) 0;
+}
+
+/* ===== Link Colors ===== */
+a:link, a:visited, a:hover, a:active {
+	color: var(--accent-warning, #f59e0b);
+}
+
+/* ===== Legacy Element Support ===== */
+/* The <text> element was used in the old HTML - now replaced with <span> */
+text {
+	cursor: default;
+}
+
+/* ===== Footer (if used) ===== */
+#footer {
+	width: 90%;
+	left: 5%;
+	border: none;
+	background: none;
+	position: absolute;
+	bottom: 5px;
+	text-align: center;
+}
+
+/* ===== Theme Background Colors (for JS manipulation) ===== */
+/* These are set by obsThemeChange() function */
+body.theme-dark { background: #1f1e1f; }
+body.theme-yami { background: #2b2e38; }
+body.theme-acri { background: #181819; }
+body.theme-grey { background: #2f2f2f; }
+body.theme-light { background: #e5e5e5; }
+body.theme-rachni { background: #232629; }

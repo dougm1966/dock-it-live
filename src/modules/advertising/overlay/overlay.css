@@ -1,0 +1,270 @@
+/**
+ * Advertising Overlay CSS
+ * Uses legacy grid layout from advertising_frame.css
+ *
+ * Grid System:
+ * - Top bar: 125px height (or 0px when hidden)
+ * - Left/Right bars: 125px width (or 0px when hidden)
+ * - Center: Flexible area (transparent for game view)
+ *
+ * U-Shape Logic:
+ * - When top bar hidden: Left/Right bars extend to TOP of viewport
+ * - Left/Right bars ALWAYS stop at scoreboard (bottom 125px reserved)
+ */
+
+html, body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	background: transparent;
+}
+
+body {
+	position: relative;
+	--ads-divider-alpha: 0.35;
+	--ads-divider-rgb: 255, 255, 255;
+	--ads-inner-corner-radius: 16px;
+}
+
+/* ============================================================================
+   FRAME ROOT: CSS Grid Container
+   ============================================================================
+   This creates the U-shape layout using CSS Grid.
+
+   Grid Template:
+   - Columns: [left] [center] [right]
+   - Rows: [top] [bottom]
+
+   Grid Areas:
+   - "top top top"     (Top bar spans all columns)
+   - "left center right" (Left bar | Center | Right bar)
+   ============================================================================ */
+
+#frameRoot {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 1920px;
+	height: 1080px;
+	background: transparent;
+	transform-origin: top left;
+	display: grid;
+
+	/* CSS Custom Properties for dynamic sizing */
+	--ads-top-h: 125px;      /* Top bar height (set to 0px to hide) */
+	--ads-left-w: 125px;     /* Left bar width (set to 0px to hide) */
+	--ads-right-w: 125px;    /* Right bar width (set to 0px to hide) */
+
+	/* Grid Layout */
+	grid-template-columns: var(--ads-left-w) 1fr var(--ads-right-w);
+	grid-template-rows: var(--ads-top-h) 1fr;
+	grid-template-areas:
+		"top top top"
+		"left center right";
+}
+
+/* ============================================================================
+   TOP BAR (T1-T6)
+   ============================================================================
+   - 6 columns for ad slots
+   - 4px gap between slots
+   - Height controlled by --ads-top-h (125px or 0px)
+   ============================================================================ */
+
+#adsTop {
+	grid-area: top;
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	grid-template-rows: 1fr;
+	gap: 4px;
+	background: transparent;
+	z-index: 2;
+	padding-left: 4px !important;
+	padding-right: 4px !important;
+	box-sizing: border-box;
+	overflow: hidden;
+	transition: opacity 0.3s ease;
+}
+
+/* ============================================================================
+   LEFT BAR (L1-L3)
+   ============================================================================
+   - 3 rows for ad slots
+   - 4px gap between slots
+   - Width controlled by --ads-left-w (125px or 0px)
+   - Extends from top bar to bottom of viewport
+   - When top bar hidden: extends to TOP (top: 0)
+   ============================================================================ */
+
+#adsLeft {
+	grid-area: left;
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: repeat(3, 1fr);
+	gap: 4px;
+	background: transparent;
+	z-index: 2;
+	border-top-right-radius: var(--ads-inner-corner-radius);
+	overflow: hidden;
+	transition: opacity 0.3s ease;
+}
+
+/* ============================================================================
+   RIGHT BAR (R1-R3)
+   ============================================================================
+   - 3 rows for ad slots
+   - 4px gap between slots
+   - Width controlled by --ads-right-w (125px or 0px)
+   - Extends from top bar to bottom of viewport
+   - When top bar hidden: extends to TOP (top: 0)
+   ============================================================================ */
+
+#adsRight {
+	grid-area: right;
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: repeat(3, 1fr);
+	gap: 4px;
+	background: transparent;
+	z-index: 2;
+	border-top-left-radius: var(--ads-inner-corner-radius);
+	overflow: hidden;
+	transition: opacity 0.3s ease;
+}
+
+/* ============================================================================
+   CENTER AREA (Transparent Play Area)
+   ============================================================================
+   - Transparent background (game view visible)
+   - Flexible size (1fr in grid)
+   - Scoreboard floats on top of this area (separate component)
+   ============================================================================ */
+
+#adsCenter {
+	grid-area: center;
+	background: transparent;
+	z-index: 1;
+	position: relative;
+}
+
+/* ============================================================================
+   AD TILES (Individual Ad Slots)
+   ============================================================================
+   - Generic container for ad images
+   - object-fit: contain (preserve aspect ratio)
+   ============================================================================ */
+
+.ad-tile {
+	position: relative;
+	overflow: hidden;
+	background: transparent;
+	box-shadow: none;
+	transition: opacity 0.3s ease;
+}
+
+.ad-tile img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	display: block;
+}
+
+/* ============================================================================
+   AD TITLE (Text Overlay when no image)
+   ============================================================================
+   - Shows placeholder text when no image uploaded
+   - Centered text with shadow
+   ============================================================================ */
+
+.ad-title {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	color: rgba(var(--ads-divider-rgb, 255, 255, 255), 0.95);
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: 700;
+	font-size: 28px;
+	letter-spacing: 0.5px;
+	text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
+	padding: 8px;
+	box-sizing: border-box;
+}
+
+.ad-title--placeholder {
+	opacity: 0.8;
+	font-size: 20px;
+	letter-spacing: 0.2px;
+}
+
+/* ============================================================================
+   DIVIDERS (Visual Separators between ad slots)
+   ============================================================================
+   - Semi-transparent white lines
+   - Only shown when "Show Dividers" is enabled
+   ============================================================================ */
+
+.ads-divider {
+	position: absolute;
+	pointer-events: none;
+	background: rgba(var(--ads-divider-rgb, 255, 255, 255), var(--ads-divider-alpha, 0.35));
+	z-index: 3;
+}
+
+.ads-divider--v {
+	top: 10%;
+	height: 80%;
+	width: 2px;
+	transform: translateX(-1px);
+}
+
+.ads-divider--h {
+	left: 10%;
+	width: 80%;
+	height: 2px;
+	transform: translateY(-1px);
+}
+
+/* ============================================================================
+   VISIBILITY STATES
+   ============================================================================
+   - Controlled by JavaScript (OverlayController.js)
+   - Sets display: none and adjusts CSS custom properties
+   ============================================================================ */
+
+#adsTop.hidden {
+	display: none;
+}
+
+#adsLeft.hidden {
+	display: none;
+}
+
+#adsRight.hidden {
+	display: none;
+}
+
+/* Fade out animation */
+.ad-tile.fadeOut {
+	opacity: 0;
+}
+
+/* ============================================================================
+   RESPONSIVE SCALING (Viewport Adaptation)
+   ============================================================================
+   - Scale frame to fit OBS window size
+   - Maintains 1920x1080 aspect ratio
+   ============================================================================ */
+
+@media (max-width: 1920px), (max-height: 1080px) {
+	#frameRoot {
+		/* Scaling handled by JavaScript for precise control */
+	}
+}

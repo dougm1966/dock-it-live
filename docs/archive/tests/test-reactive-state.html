@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reactive State Test - Dock-It.live</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+      }
+      h1 {
+        color: #4ec9b0;
+      }
+      h2 {
+        color: #9cdcfe;
+        margin-top: 30px;
+      }
+      .panel {
+        background: #252526;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 8px;
+        border-left: 4px solid #007acc;
+      }
+      .score-display {
+        font-size: 72px;
+        font-weight: bold;
+        text-align: center;
+        padding: 30px;
+        background: #1e1e1e;
+        border-radius: 8px;
+        margin: 20px 0;
+        color: #4ec9b0;
+      }
+      .player-name {
+        font-size: 24px;
+        color: #9cdcfe;
+        margin-bottom: 10px;
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        margin-top: 20px;
+      }
+      button {
+        background: #007acc;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      button:hover {
+        background: #005a9e;
+      }
+      button.danger {
+        background: #ea4335;
+      }
+      button.danger:hover {
+        background: #c5221f;
+      }
+      button.success {
+        background: #34a853;
+      }
+      button.success:hover {
+        background: #2d9148;
+      }
+      .status {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        text-align: center;
+      }
+      .status.success {
+        background: #1e5f2d;
+        color: #4ec9b0;
+      }
+      .status.info {
+        background: #264f78;
+        color: #9cdcfe;
+      }
+      code {
+        background: #1e1e1e;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #ce9178;
+      }
+      pre {
+        background: #1e1e1e;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        font-size: 13px;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔄 Reactive State Test</h1>
+    <p>
+      This demonstrates the reactive database-first state pattern. Updates to the database
+      automatically propagate to all UI components via Dexie liveQuery.
+    </p>
+
+    <div id="status" class="status info">Initializing state manager...</div>
+
+    <h2>Live Scoreboard (Auto-Updates)</h2>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="player-name" id="player1-name">Player 1</div>
+        <div class="score-display" id="player1-score">0</div>
+        <div class="controls">
+          <button onclick="incrementScore(1)">+1 Point</button>
+          <button onclick="decrementScore(1)">-1 Point</button>
+          <button onclick="setScore(1, 5)">Set to 5</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="player-name" id="player2-name">Player 2</div>
+        <div class="score-display" id="player2-score">0</div>
+        <div class="controls">
+          <button onclick="incrementScore(2)">+1 Point</button>
+          <button onclick="decrementScore(2)">-1 Point</button>
+          <button onclick="setScore(2, 5)">Set to 5</button>
+        </div>
+      </div>
+    </div>
+
+    <h2>Match Controls</h2>
+    <div class="panel">
+      <div class="controls">
+        <button class="success" onclick="resetScores()">Reset Scores (New Game)</button>
+        <button class="success" onclick="resetMatch()">Reset Match</button>
+        <button onclick="swapPlayers()">Swap Players</button>
+        <button onclick="setPlayerName(1)">Set Player 1 Name</button>
+        <button onclick="setPlayerName(2)">Set Player 2 Name</button>
+      </div>
+    </div>
+
+    <h2>Raw State (Auto-Updates)</h2>
+    <div class="panel">
+      <pre id="state-display">Loading...</pre>
+    </div>
+
+    <h2>How It Works</h2>
+    <div class="panel">
+      <p><strong>Reactive Flow:</strong></p>
+      <ol>
+        <li>You click "+1 Point" button</li>
+        <li>
+          <code>stateManager.incrementScore(1)</code> writes to <code>dock_it_db</code> database
+        </li>
+        <li>Dexie liveQuery detects database change</li>
+        <li>All subscribed components receive update automatically</li>
+        <li>UI updates without manual DOM manipulation</li>
+      </ol>
+
+      <p><strong>Key Code:</strong></p>
+      <pre>// Subscribe to player 1 score
+stateManager.subscribeToPlayer1Score(score => {
+  document.getElementById('player1-score').textContent = score;
+});
+
+// Update score (database write triggers subscription)
+await stateManager.incrementScore(1);</pre>
+
+      <p><strong>Benefits:</strong></p>
+      <ul>
+        <li>✅ Database is single source of truth</li>
+        <li>✅ UI automatically syncs across all components</li>
+        <li>✅ No manual DOM updates needed</li>
+        <li>✅ Works across browser windows (BroadcastChannel)</li>
+        <li>✅ State persists through browser refresh</li>
+      </ul>
+    </div>
+
+    <script type="module">
+      import { stateManager } from '../src/core/state/StateManager.js';
+
+      // Global reference for onclick handlers
+      window.stateManager = stateManager;
+
+      // Initialize state manager
+      const statusDiv = document.getElementById('status');
+      try {
+        await stateManager.init();
+        statusDiv.textContent = '✅ State manager initialized - Database: dock_it_db';
+        statusDiv.className = 'status success';
+      } catch (error) {
+        statusDiv.textContent = '❌ Failed to initialize: ' + error.message;
+        statusDiv.className = 'status danger';
+        console.error(error);
+      }
+
+      // Subscribe to player 1 score (reactive)
+      stateManager.subscribeToPlayer1Score(score => {
+        document.getElementById('player1-score').textContent = score || 0;
+      });
+
+      // Subscribe to player 2 score (reactive)
+      stateManager.subscribeToPlayer2Score(score => {
+        document.getElementById('player2-score').textContent = score || 0;
+      });
+
+      // Subscribe to entire state for display (reactive)
+      stateManager.subscribe(state => {
+        if (state) {
+          // Update player names
+          document.getElementById('player1-name').textContent = state.player1?.name || 'Player 1';
+          document.getElementById('player2-name').textContent = state.player2?.name || 'Player 2';
+
+          // Update raw state display
+          document.getElementById('state-display').textContent = JSON.stringify(state, null, 2);
+        }
+      });
+
+      // Button handlers
+      window.incrementScore = async playerNum => {
+        await stateManager.incrementScore(playerNum);
+      };
+
+      window.decrementScore = async playerNum => {
+        await stateManager.decrementScore(playerNum);
+      };
+
+      window.setScore = async (playerNum, score) => {
+        await stateManager.setScore(playerNum, score);
+      };
+
+      window.resetScores = async () => {
+        await stateManager.resetScores();
+      };
+
+      window.resetMatch = async () => {
+        await stateManager.resetMatch();
+      };
+
+      window.swapPlayers = async () => {
+        await stateManager.swapPlayers();
+      };
+
+      window.setPlayerName = async playerNum => {
+        const name = prompt(`Enter Player ${playerNum} name:`);
+        if (name) {
+          await stateManager.setPlayerName(playerNum, name);
+        }
+      };
+
+      console.log('🔄 Reactive State Manager Ready');
+      console.log('Try opening DevTools → Application → IndexedDB → dock_it_db');
+      console.log('Watch the database update in real-time as you change scores!');
+    </script>
+  </body>
+</html>

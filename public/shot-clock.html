@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shot Clock - Dock-It.live</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Arial Black', sans-serif;
+      overflow: hidden;
+    }
+
+    .shot-clock-container {
+      text-align: center;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+
+    .shot-clock-container.hidden {
+      opacity: 0;
+    }
+
+    .shot-clock {
+      font-size: 180px;
+      font-weight: 900;
+      color: #00ff00;
+      text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+      line-height: 1;
+      transition: all 0.3s ease;
+    }
+
+    .shot-clock.warning {
+      color: #ffaa00;
+      text-shadow: 0 0 20px rgba(255, 170, 0, 0.7);
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    .shot-clock.critical {
+      color: #ff0000;
+      text-shadow: 0 0 30px rgba(255, 0, 0, 0.9);
+      animation: pulse-fast 0.5s ease-in-out infinite;
+    }
+
+    .shot-clock.expired {
+      color: #ff0000;
+      animation: flash 0.3s ease-in-out infinite;
+    }
+
+    .label {
+      font-size: 36px;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      margin-top: 20px;
+      letter-spacing: 4px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes pulse-fast {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes flash {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0.3; }
+    }
+
+    /* Debug panel (hidden by default) */
+    .debug {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #0f0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      display: none;
+    }
+
+    .debug.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="shot-clock-container" id="container">
+    <div class="shot-clock" id="clock">40</div>
+    <div class="label">SHOT CLOCK</div>
+  </div>
+
+  <div class="debug" id="debug">
+    <div>Enabled: <span id="debug-enabled">false</span></div>
+    <div>Running: <span id="debug-running">false</span></div>
+    <div>Time: <span id="debug-time">40</span></div>
+    <div>Duration: <span id="debug-duration">40</span></div>
+  </div>
+
+  <script type="module">
+    console.log('🕐 Shot Clock script loading...');
+
+    import { stateManager } from '../src/core/state/StateManager.js';
+    import { messageBus, MESSAGE_TYPES } from '../src/core/messaging/index.js';
+
+    console.log('✅ Imports loaded');
+
+    const clockEl = document.getElementById('clock');
+    const containerEl = document.getElementById('container');
+    const debugEl = document.getElementById('debug');
+
+    console.log('✅ DOM elements found:', { clockEl, containerEl, debugEl });
+
+    let tickInterval = null;
+
+    // Initialize
+    async function init() {
+      console.log('📡 Initializing StateManager...');
+      try {
+        await stateManager.init();
+        console.log('✅ Shot Clock initialized');
+
+        const state = await stateManager.getState();
+        console.log('📊 Current state:', state);
+
+        // Subscribe to shot clock state
+        stateManager.subscribeToShotClock(shotClock => {
+          updateDisplay(shotClock);
+        });
+
+        // Listen for tick messages (if control panel sends them)
+        messageBus.on(MESSAGE_TYPES.SHOT_CLOCK_TICK, ({ time }) => {
+          if (typeof time === 'number') {
+            clockEl.textContent = time;
+            updateStyle(time);
+          }
+        });
+
+        // Show/hide based on enabled state (reuse state from above)
+        console.log('🎯 Shot clock enabled:', state.matchData?.shotClock?.enabled);
+        if (!state.matchData?.shotClock?.enabled) {
+          containerEl.classList.add('hidden');
+        }
+
+      } catch (error) {
+        console.error('❌ Shot Clock initialization failed:', error);
+      }
+    }
+
+    function updateDisplay(shotClock) {
+      if (!shotClock) return;
+
+      const { enabled, running, currentTime, duration } = shotClock;
+
+      // Update debug panel
+      document.getElementById('debug-enabled').textContent = enabled;
+      document.getElementById('debug-running').textContent = running;
+      document.getElementById('debug-time').textContent = currentTime;
+      document.getElementById('debug-duration').textContent = duration;
+
+      // Show/hide clock
+      if (enabled) {
+        containerEl.classList.remove('hidden');
+      } else {
+        containerEl.classList.add('hidden');
+      }
+
+      // Update time display
+      clockEl.textContent = currentTime;
+
+      // Update visual style based on time
+      updateStyle(currentTime, duration);
+
+      // Handle ticking
+      if (running && !tickInterval) {
+        startTicking();
+      } else if (!running && tickInterval) {
+        stopTicking();
+      }
+    }
+
+    function updateStyle(time, duration) {
+      clockEl.classList.remove('warning', 'critical', 'expired');
+
+      if (time <= 0) {
+        clockEl.classList.add('expired');
+      } else if (time <= 5) {
+        clockEl.classList.add('critical');
+      } else if (time <= 10) {
+        clockEl.classList.add('warning');
+      }
+    }
+
+    function startTicking() {
+      if (tickInterval) return;
+
+      tickInterval = setInterval(async () => {
+        const state = await stateManager.getState();
+        const shotClock = state.matchData?.shotClock;
+
+        if (!shotClock || !shotClock.running) {
+          stopTicking();
+          return;
+        }
+
+        const newTime = Math.max(0, shotClock.currentTime - 1);
+        await stateManager.updateShotClockTime(newTime);
+
+        // Play sound effects
+        if (newTime === 5) {
+          playBeep();
+        } else if (newTime === 0) {
+          playBuzz();
+          stopTicking();
+        }
+      }, 1000);
+    }
+
+    function stopTicking() {
+      if (tickInterval) {
+        clearInterval(tickInterval);
+        tickInterval = null;
+      }
+    }
+
+    function playBeep() {
+      // Optional: Add beep sound
+      console.log('🔔 Beep (5 seconds remaining)');
+    }
+
+    function playBuzz() {
+      // Optional: Add buzz sound
+      console.log('🚨 Buzz (Time expired)');
+    }
+
+    // Toggle debug panel with 'D' key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'd' || e.key === 'D') {
+        debugEl.classList.toggle('show');
+      }
+    });
+
+    // Initialize on load
+    init();
+
+    console.log('🕐 Shot Clock Display Ready');
+    console.log('Press D to toggle debug panel');
+  </script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+/* ==========================================================================
+   g4ScoreBoard Control Panel - Layout CSS
+   CSS Grid Utilities and Layout Containers
+   ========================================================================== */
+
+/* ===== Main Container ===== */
+#mainDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--panel-width);
+  max-width: 100%;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: var(--panel-padding);
+  padding-top: 40px; /* Space for fixed header */
+  background: var(--bg-primary);
+}
+
+/* ===== Grid Section Container ===== */
+.grid-section {
+  display: grid;
+  gap: var(--grid-gap);
+  width: 100%;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Last grid-section in a card shouldn't have bottom margin */
+.section-card > .grid-section:last-child {
+  margin-bottom: 0;
+}
+
+/* ===== Column Layouts ===== */
+.grid-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ===== Column Spans ===== */
+.col-span-2 {
+  grid-column: span 2;
+}
+
+.col-span-3 {
+  grid-column: span 3;
+}
+
+.col-span-full {
+  grid-column: 1 / -1;
+}
+
+/* ===== Section Card ===== */
+.section-card {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  width: 100%;
+}
+
+.section-card__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--border-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===== Divider ===== */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border-color);
+  border: none;
+  margin: var(--spacing-sm) 0;
+}
+
+/* ===== Input Row (Label + Input inline) ===== */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  margin-bottom: var(--spacing-xs);
+}
+
+.input-row label {
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  min-width: 70px;
+}
+
+.input-row .input-field {
+  flex: 1;
+}
+
+/* ===== Checkbox Row ===== */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* ===== Panel Header (Fixed) ===== */
+.panel-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--spacing-md);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 100;
+}
+
+.panel-header .version-text {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.panel-header #updateStatus {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.panel-header #updateStatus a {
+  color: var(--accent-warning);
+}
+
+/* ===== Slider Container ===== */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.slider-row label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  min-width: 50px;
+}
+
+.slider-row .slidecontainer {
+  flex: 1;
+}
+
+/* ===== Input Group (Stacked label + input) ===== */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.input-group label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* ===== Subsection Title ===== */
+.subsection-title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: var(--spacing-sm) 0 var(--spacing-xs) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ===== Sponsor Settings ===== */
+.sponsor-settings {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.sponsor-settings .input-row {
+  margin-bottom: 0;
+}
+
+.sponsor-slots,
+.sponsor-positions {
+  margin-top: var(--spacing-sm);
+}
+
+/* ===== Panel Header ===== */
+.panel-header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--panel-width);
+  max-width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-md);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+.version-text {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+#updateStatus {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+#updateStatus a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+#updateStatus a:hover {
+  text-decoration: underline;
+}

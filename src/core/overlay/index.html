@@ -1,0 +1,124 @@
+<!doctype html>
+<!--
+Dock-It.live Master Shell Overlay
+Universal overlay entry point for OBS browser sources
+Supports multiple sports with dynamic skin system and ad zones
+
+Created by Douglas Montgomery of AI1offs
+GitHub: https://github.com/dougm1966/dock-it-live
+Park County Pool League
+
+Features:
+- 125px Ad Zones (Top: 6-col, Left/Right: 3-row)
+- Dynamic skin switching via BroadcastChannel
+- Module-aware layout (shrinks with ads enabled)
+- Universal for all sports (billiards, darts, etc.)
+-->
+<html lang="en" class="scale-100">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Dock-It.live Overlay</title>
+
+	<!-- Skin CSS (complete styling - layout + visuals) -->
+	<!-- SkinManager will set the href to load the selected skin -->
+	<link id="overlay-skin-link" rel="stylesheet" href="../../modules/overlay/skins/default/default.css" />
+</head>
+<body>
+	<!-- Top Ad Zone: 6-column CSS Grid -->
+	<div id="topAdZone" class="ad-zone ad-zone-top">
+		<div class="ad-slot" data-slot="T1"></div>
+		<div class="ad-slot" data-slot="T2"></div>
+		<div class="ad-slot" data-slot="T3"></div>
+		<div class="ad-slot" data-slot="T4"></div>
+		<div class="ad-slot" data-slot="T5"></div>
+		<div class="ad-slot" data-slot="T6"></div>
+	</div>
+
+	<!-- Left Ad Zone: 3-row CSS Grid -->
+	<div id="leftAdZone" class="ad-zone ad-zone-left">
+		<div class="ad-slot" data-slot="L1"></div>
+		<div class="ad-slot" data-slot="L2"></div>
+		<div class="ad-slot" data-slot="L3"></div>
+	</div>
+
+	<!-- Right Ad Zone: 3-row CSS Grid -->
+	<div id="rightAdZone" class="ad-zone ad-zone-right">
+		<div class="ad-slot" data-slot="R1"></div>
+		<div class="ad-slot" data-slot="R2"></div>
+		<div class="ad-slot" data-slot="R3"></div>
+	</div>
+
+	<!-- Main Overlay Content (respects ad borders) -->
+	<div id="mainOverlay">
+		<div class="bs-overlay">
+			<!-- Scoreboard Section -->
+			<section id="scoreBoardDiv" class="fadeInElm bs-scoreboard">
+				<!-- Shot Clock Progress Bar -->
+				<div class="shotclockvis fadeOutElm" id="shotClockVis"></div>
+
+				<!-- Game Info Section -->
+				<section class="bs-game-info">
+					<div class="noShow fadeInElm" id="raceInfo">&nbsp;</div>
+					<div class="noShow fadeInElm" id="wagerInfo">&nbsp;</div>
+				</section>
+
+				<!-- Score Table -->
+				<table id="scoreBoard" class="bs-score-table">
+					<colgroup>
+						<col class="bs-col-left">
+						<col class="bs-col-mid">
+						<col class="bs-col-right">
+					</colgroup>
+					<tbody>
+						<tr>
+							<td id="player1Name" class="bs-player-name">
+								<div class="fadeInElm bs-ext-icon" id="p1ExtIcon">Ex</div>
+								<img id="player1-photo" class="playerPhoto" src="" alt="">
+								<img class="fadeOutElm bs-logo bs-logo-left" id="leftSponsorLogoImg" height="20" src="" alt="">
+								<span class="playerNameText">Player 1</span>
+							</td>
+							<td class="bs-score-cluster">
+								<span id="player1Score" class="bs-score-pill">0</span>
+								<div class="fadeOutElm" id="shotClock">&nbsp;</div>
+								<span id="player2Score" class="bs-score-pill">0</span>
+							</td>
+							<td id="player2Name" class="bs-player-name">
+								<span class="playerNameText">Player 2</span>
+								<img class="fadeOutElm bs-logo bs-logo-right" id="rightSponsorLogoImg" height="20" src="" alt="">
+								<img id="player2-photo" class="playerPhoto" src="" alt="">
+								<div class="fadeInElm bs-ext-icon" id="p2ExtIcon">Ex</div>
+							</td>
+						</tr>
+						<tr class="bt-row">
+							<td class="bt-cell"><div id="p1BallRack" class="bt-rack noShow"></div></td>
+							<td class="bt-cell bt-cell--mid"><div id="midBallRack" class="bt-rack bt-rack--mid noShow"></div></td>
+							<td class="bt-cell"><div id="p2BallRack" class="bt-rack noShow"></div></td>
+						</tr>
+						<tr class="bt-full-row">
+							<td class="bt-cell bt-cell--full" colspan="3"><div id="fullBallRack" class="bt-rack bt-rack--full noShow"></div></td>
+						</tr>
+					</tbody>
+				</table>
+
+				<!-- Logo Slideshow -->
+				<div id="logoSlideshowDiv" class="slideshow-container fadeOutElm">
+					<div class="mySlides logoSlide fade">
+						<img id="customLogo1" src="" style="height:20px" alt="Logo 1">
+					</div>
+					<div class="mySlides logoSlide fade">
+						<img id="customLogo2" src="" style="height:20px" alt="Logo 2">
+					</div>
+					<div class="mySlides logoSlide fade">
+						<img id="customLogo3" src="" style="height:20px" alt="Logo 3">
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+
+	<!-- Load Overlay Controller as ES Module -->
+	<!-- NOTE: This should point to a universal OverlayController or sport-specific controller -->
+	<script type="module" src="../../modules/billiards/overlay/OverlayController.js"></script>
+</body>
+</html>

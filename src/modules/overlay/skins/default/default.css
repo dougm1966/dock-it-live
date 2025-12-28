@@ -1,0 +1,647 @@
+/*
+  PCPL ScoreBoard Browser Source - Unified CSS
+  All scales in one modern file using CSS custom properties
+  Inspired by g4ScoreBoard concept
+  GitHub: https://github.com/dougm1966/g4ScoreBoard
+  Park County Pool League
+*/
+
+/* ===== Scale Variables ===== */
+/* Default: 100% scale */
+:root {
+	--scale-zoom: 1.00;
+	--scale-transform: scale(1.00, 1.00);
+	--logo-left: 1025px;
+	--logo-right: 1025px;
+	--race-left: 155px;
+	--wager-right: 145px;
+	--slides-left: 1121px;
+	--player-name-font-size: 15pt;
+	--ext-padding: 6px;
+	--bs-mid-w: 72px;
+	--bs-mid-pad-x: 0px;
+	--bs-clock-w: 3.6ch;
+	--bs-inner-logo-shift: 0px;
+	--bs-split-transition: 0.3s;
+}
+
+/* 125% Scale */
+html.scale-125,
+body.scale-125 {
+	--scale-zoom: 1.25;
+	--scale-transform: scale(1.25, 1.25);
+	--logo-left: 823px;
+	--logo-right: 823px;
+	--race-left: 130px;
+	--wager-right: 120px;
+	--slides-left: 900px;
+	--ext-padding: 6px;
+}
+
+/* 150% Scale */
+html.scale-150,
+body.scale-150 {
+	--scale-zoom: 1.50;
+	--scale-transform: scale(1.50, 1.50);
+	--logo-left: 690px;
+	--logo-right: 690px;
+	--race-left: 110px;
+	--wager-right: 100px;
+	--slides-left: 754px;
+	--ext-padding: 5.55px;
+}
+
+/* 200% Scale (XL) */
+html.scale-200,
+body.scale-200 {
+	--scale-zoom: 2.00;
+	--scale-transform: scale(2.00, 2.00);
+	--logo-left: 525px;
+	--logo-right: 525px;
+	--race-left:40px;
+	--wager-right: 40px;
+	--slides-left: 573px;
+	--slides-bottom: 13.75px;
+	--player-name-font-size: 12pt;
+	--ext-padding: 5.55px;
+}
+
+/* ===== Base Styles ===== */
+body {
+	background-color: rgba(0, 0, 0, 0);
+	margin: 0px auto;
+	overflow: hidden;
+	transform: none;
+	-moz-transform: var(--scale-transform);
+	zoom: var(--scale-zoom);
+	font-family: tahoma;
+}
+
+#scoreBoardDiv {
+	position: absolute;
+	bottom: 0px;
+	width: calc(100% - 130px);
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 5px;
+	z-index: 2;
+	height: auto;
+}
+
+#scoreBoardDiv.clock-visible {
+	--bs-mid-w: 112px;
+	--bs-inner-logo-shift: 0px;
+}
+
+td {
+	border: 2px solid black;
+	border-radius: 10px;
+	vertical-align: middle;
+	padding: 0; /* Remove default padding so extension icons can fill completely */
+}
+
+#scoreBoard {
+	width: 95%;
+	margin: auto;
+	table-layout: fixed;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+ #scoreBoard col.bs-col-left,
+ #scoreBoard col.bs-col-right {
+	width: calc((100% - var(--bs-mid-w)) / 2);
+	transition: width var(--bs-split-transition) ease;
+ }
+
+ #scoreBoard col.bs-col-mid {
+	width: var(--bs-mid-w);
+	transition: width var(--bs-split-transition) ease;
+ }
+
+#player1Score,
+#player2Score {
+	text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+	text-align: center;
+	padding-right: 1px;
+	padding-left: 1px;
+	background: rgba(255, 255, 255, 1);
+	font-size: 15pt;
+	font-weight: bold;
+	vertical-align: middle;
+}
+
+/* Score cells become transparent containers; the inner pill is the visual box */
+.bs-score-cell {
+	border: none !important;
+	background: transparent !important;
+	padding: 0 !important;
+	text-align: center;
+	width: 40px;
+	min-width: 40px;
+	max-width: 40px;
+}
+
+.bs-score-cluster {
+	border: none !important;
+	background: transparent !important;
+	padding: 0 var(--bs-mid-pad-x) !important;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	width: var(--bs-mid-w);
+	min-width: var(--bs-mid-w);
+	max-width: var(--bs-mid-w);
+	box-sizing: border-box;
+	transition: width var(--bs-split-transition) ease, min-width var(--bs-split-transition) ease, max-width var(--bs-split-transition) ease;
+}
+
+.bs-score-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.4ch;
+	min-width: 2.4ch;
+	padding: 0 0.2ch;
+	height: 100%;
+	border: 2px solid #000;
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 1);
+	font-size: 15pt;
+	font-weight: bold;
+	box-sizing: border-box;
+	margin: 0;
+}
+
+.noShow {
+	visibility: hidden;
+}
+
+#player1Name,
+#player2Name {
+	background: rgba(255, 255, 255, 1);
+	font-size: 10pt;
+	font-weight: bold;
+	text-align: center;
+	vertical-align: middle;
+}
+
+/* Standalone shot clock display (not part of the score table) */
+#shotClock {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: auto;
+	min-width: var(--bs-clock-w);
+	padding: 2px 4px;
+	height: 100%;
+	border: 2px solid #000;
+	border-radius: 10px;
+	background: green;
+	font-size: 15pt;
+	font-weight: bold;
+	line-height: 1;
+	box-sizing: border-box;
+	margin: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	transition: width var(--bs-split-transition) ease, min-width var(--bs-split-transition) ease, padding var(--bs-split-transition) ease, border-width var(--bs-split-transition) ease;
+}
+
+#shotClock.fadeOutElm {
+	width: 0px;
+	min-width: 0px;
+	padding-left: 0;
+	padding-right: 0;
+	border-width: 0;
+}
+
+#player1Name,
+#player2Name {
+	font-size: var(--player-name-font-size);
+	position: relative;
+	overflow: hidden;
+}
+
+/* ===== Ball Tracker (8-ball under-name racks) ===== */
+:root {
+	--bt-ball-size: 16px;
+	--bt-rack-bg: rgba(255, 255, 255, 0.9);
+	--bt-rack-radius: calc((var(--bt-ball-size) / 2) + 6px);
+	--bt-rack-pad-x: 02px;
+	--bt-rack-pad-y: 02px;
+}
+
+.bt-rack {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 2px;
+	margin-top: 05px;
+	background: var(--bt-rack-bg);
+	border-radius: 0;
+	padding: 2px var(--bt-rack-pad-x) var(--bt-rack-pad-y);
+	width: fit-content;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.bt-rack--mid {
+	justify-content: center;
+	border-radius: 0;
+	padding-left: 0;
+	padding-right: 0;
+	width: 100%;
+}
+
+.bt-ball {
+	width: var(--bt-ball-size);
+	height: var(--bt-ball-size);
+	display: inline-block;
+}
+
+.bt-ball--placeholder {
+	opacity: 0.25;
+}
+
+.bt-ball--pocketed {
+	opacity: 0.35;
+}
+
+tr.bt-row td.bt-cell {
+	border: none;
+	background: transparent;
+	padding: 0;
+}
+
+tr.bt-row td.bt-cell--mid {
+	padding: 0;
+}
+
+tr.bt-row td.bt-cell:first-child .bt-rack {
+	justify-content: flex-end;
+	margin-left: auto;
+	border-radius: var(--bt-rack-radius) 0 0 var(--bt-rack-radius);
+	padding-right: 0;
+}
+
+tr.bt-row td.bt-cell:last-child .bt-rack {
+	justify-content: flex-start;
+	margin-right: auto;
+	border-radius: 0 var(--bt-rack-radius) var(--bt-rack-radius) 0;
+	padding-left: 0;
+}
+
+/* ===== Name centering with dynamic padding (no layout model changes) ===== */
+/*
+  We keep Ex/photo/sponsor logos absolutely positioned.
+  The player name is centered by padding the text container to reserve space
+  for the visible elements on each side.
+*/
+
+#player1Name {
+	--p1-ex: 0px;
+	--p1-photo: 0px;
+	--p1-logo: 0px;
+}
+
+#player2Name {
+	--p2-ex: 0px;
+	--p2-photo: 0px;
+	--p2-logo: 0px;
+}
+
+/* Reserve 28px for Ex when clock is enabled */
+#player1Name.clock-enabled { --p1-ex: 28px; }
+#player2Name.clock-enabled { --p2-ex: 28px; }
+
+/* Reserve 22px photo + 6px gap when a photo is visible */
+#player1Name.has-photo { --p1-photo: 28px; }
+#player2Name.has-photo { --p2-photo: 28px; }
+
+/* Reserve 90px logo + 6px gap when sponsor logo is visible */
+#player1Name.has-left-sponsor-logo { --p1-logo: 96px; }
+#player2Name.has-right-sponsor-logo { --p2-logo: 96px; }
+
+/* Apply padding to the name text to center it in the remaining space */
+#player1Name .playerNameText {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	padding-left: calc(6px + var(--p1-ex) + var(--p1-photo));
+	padding-right: calc(6px + var(--p1-logo));
+	box-sizing: border-box;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#player2Name .playerNameText {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	padding-left: calc(6px + var(--p2-logo));
+	padding-right: calc(6px + var(--p2-ex) + var(--p2-photo));
+	box-sizing: border-box;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#player1Name {
+	background-image: linear-gradient(to left, white, steelblue);
+	text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+#player2Name {
+	background-image: linear-gradient(to right, white, steelblue);
+	text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+/* ===== Extension Icons ===== */
+#p1ExtIcon,
+#p2ExtIcon {
+	position: absolute;
+	background: green;
+	border: solid 1px #000;
+	color: #fff;
+	font-size: 11px;
+	line-height: 1;
+	font-weight: 400;
+	text-shadow: none;
+	padding: 0;
+	z-index: 10;
+	/* Fill the cell height - fit within the border */
+	top: -1px;
+	bottom: -1px;
+	height: calc(100% + 2px); /* Extend 1px beyond content area on each side */
+	/* Center text vertically within the icon */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* Fixed width for consistent sizing */
+	width: 28px;
+	box-sizing: border-box;
+}
+
+#p1ExtIcon {
+	left: -1px; /* Offset for cell border */
+	border-radius: 8px 0px 0px 8px;
+	border-right: none;
+}
+
+#p2ExtIcon {
+	right: -1px; /* Offset for cell border */
+	border-radius: 0px 8px 8px 0px;
+	border-left: none;
+}
+
+/* ===== Utility Classes ===== */
+.greenBtn {
+	background: green;
+	color: white;
+}
+
+.redBtn {
+	background: red;
+	color: white;
+}
+
+.shotRed {
+	color: white;
+}
+
+/* ===== Animation States ===== */
+.fadeInElm {
+	visibility: visible;
+	opacity: 1;
+	transition: opacity 1s linear;
+}
+
+.fadeOutElm {
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 0s 1s, opacity 1s linear;
+}
+
+/* ===== Blink Animations ===== */
+@keyframes blinking {
+	0% {
+		background-color: #ffffff;
+	}
+	100% {
+		background-color: lightgreen;
+	}
+}
+
+.winBlink {
+	animation: blinking 0.1s 4;
+}
+
+@keyframes extblinking {
+	0% {
+		background-color: green;
+	}
+	100% {
+		background-color: red;
+	}
+}
+
+.extBlink {
+	animation: extblinking 0.15s 3;
+}
+
+/* ===== Logos ===== */
+.bs-logo {
+	position: absolute;
+	z-index: 9;
+	/* Vertical centering - same as player photos */
+	top: 50%;
+	transform: translateY(-50%);
+	max-width: 90px;
+	max-height: 20px;
+	width: auto;
+	height: 20px;
+}
+
+.bs-logo-left {
+	right: calc(8px + var(--bs-inner-logo-shift));
+	transition: right var(--bs-split-transition) ease;
+}
+
+.bs-logo-right {
+	left: calc(8px + var(--bs-inner-logo-shift));
+	transition: left var(--bs-split-transition) ease;
+}
+
+/* ===== Player Photos ===== */
+.playerPhoto {
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	object-fit: cover;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	display: none;
+}
+
+#player1-photo {
+	left: 3px;
+	transition: left 0.3s ease;
+	transition-delay: 0.8s; /* Wait for Ex to fade before sliding back */
+}
+
+#player2-photo {
+	right: 3px;
+	transition: right 0.3s ease;
+	transition-delay: 0.8s; /* Wait for Ex to fade before sliding back */
+}
+
+.playerPhoto.photoVisible {
+	display: block;
+}
+
+/* Move photos inward when clock is active to avoid extension icon overlap */
+#player1-photo.clockActive {
+	left: 31px;
+	transition-delay: 0s; /* No delay when sliding out */
+}
+
+#player2-photo.clockActive {
+	right: 31px;
+	transition-delay: 0s; /* No delay when sliding out */
+}
+
+/* ===== Race & Wager Info ===== */
+#raceInfo,
+#wagerInfo {
+	position: absolute;
+	top: 5px;
+	width: fit-content;
+	min-width: 80px;
+	max-width: 320px;
+	border-radius: 10px 10px 0px 0px;
+	text-align: center;
+	padding: 4px 10px 1px;
+	font-size: 8pt;
+	font-weight: bolder;
+	border: 1px solid #000;
+	border-bottom: none;
+	color: #000;
+	z-index: 1;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+	transform: translateZ(0);
+	backface-visibility: hidden;
+}
+
+#raceInfo {
+	background-image: linear-gradient(to right, rgb(138, 216, 146), white);
+	left: var(--race-left);
+}
+
+#wagerInfo {
+	background-image: linear-gradient(to left, rgb(138, 216, 146), white);
+	right: var(--wager-right);
+}
+
+tr.bt-full-row td.bt-cell {
+	border: none;
+	background: transparent;
+	padding: 0;
+	text-align: center;
+}
+
+.bt-rack--full {
+	justify-content: center;
+	flex-wrap: nowrap;
+	gap: 2px;
+	border-radius: var(--bt-rack-radius);
+	width: fit-content;
+	margin: 0 auto;
+	max-width: 100%;
+}
+
+/* ===== Shot Clock Progress Bar ===== */
+.shotclockvis {
+	position: absolute;
+	width: 90%;
+	left: 5%;
+	bottom: 3px;
+	height: 3px;
+	background: transparent;
+	border-radius: 5px;
+}
+
+.startTimer {
+	width: 0px;
+	transition: width 30s;
+	transition-timing-function: linear;
+}
+
+.start60 {
+	width: 0px;
+	transition-property: width;
+	transition-duration: 60s;
+	transition-timing-function: linear;
+}
+
+/* ===== Logo Slideshow ===== */
+.mySlides {
+	position: fixed;
+	display: none;
+	bottom: var(--slides-bottom, 14px);
+	left: var(--slides-left);
+}
+
+.slideshow-container {
+	position: relative;
+	margin: auto;
+}
+
+.fade {
+	animation-name: fade;
+	animation-duration: 1.5s;
+}
+
+@keyframes fade {
+	from {
+		opacity: 0.4;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.logoSlide {
+	display: none;
+}
+
+/* ===== Component Containers (from required.css) ===== */
+.bs-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.bs-game-info {
+	display: block;
+	position: relative;
+	height: 24px;
+}
+
+.bs-scoreboard {
+	display: block;
+}
+
+.bs-score-table {
+	width: 100%;
+}
+
+.playerNameText {
+	display: inline-block;
+}

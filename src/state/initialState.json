@@ -1,0 +1,102 @@
+{
+  "uiSettings": {
+    "showTop": true,
+    "showLeft": true,
+    "showRight": true,
+    "showTableTopLeft": true,
+    "showTableTopRight": true,
+    "showDividers": true,
+    "showScoreboard": true,
+    "showShotClock": false,
+    "showPlayerNames": true,
+    "showLogos": true,
+    "showCustom1": false,
+    "showCustom2": false,
+    "activeTheme": "modern-dark",
+    "overlaySkin": "default"
+  },
+  "modules": {
+    "shotClock": {
+      "enabled": false,
+      "visible": false,
+      "duration": 30,
+      "running": false,
+      "currentTime": 30,
+      "extensionDuration": 10,
+      "maxExtensions": 3
+    },
+    "billiards": {
+      "enabled": true
+    },
+    "darts": {
+      "enabled": false
+    },
+    "advertising": {
+      "enabled": false,
+      "showTop": true,
+      "showLeft": true,
+      "showRight": true
+    }
+  },
+  "logoSlots": {
+    "T1": { "assetId": null, "active": false, "opacity": 1.0 },
+    "T2": { "assetId": null, "active": false, "opacity": 1.0 },
+    "T3": { "assetId": null, "active": false, "opacity": 1.0 },
+    "T4": { "assetId": null, "active": false, "opacity": 1.0 },
+    "T5": { "assetId": null, "active": false, "opacity": 1.0 },
+    "T6": { "assetId": null, "active": false, "opacity": 1.0 },
+    "L1": { "assetId": null, "active": false, "opacity": 1.0 },
+    "L2": { "assetId": null, "active": false, "opacity": 1.0 },
+    "L3": { "assetId": null, "active": false, "opacity": 1.0 },
+    "R1": { "assetId": null, "active": false, "opacity": 1.0 },
+    "R2": { "assetId": null, "active": false, "opacity": 1.0 },
+    "R3": { "assetId": null, "active": false, "opacity": 1.0 },
+    "tableTopLeft": { "assetId": null, "active": false, "opacity": 0.8 },
+    "tableTopRight": { "assetId": null, "active": false, "opacity": 0.8 },
+    "scoreP1": { "assetId": null, "active": false, "opacity": 1.0 },
+    "scoreP2": { "assetId": null, "active": false, "opacity": 1.0 }
+  },
+  "matchData": {
+    "activeSport": "billiards",
+    "raceInfo": "Race to 7",
+    "player1": {
+      "name": "Player 1",
+      "fargoInfo": "Fargo 520",
+      "score": 0,
+      "timeouts": 1,
+      "extensions": 0,
+      "ratings": {
+        "fargo": 520,
+        "ppd": null,
+        "mpr": null,
+        "display": "fargo",
+        "source": "manual"
+      }
+    },
+    "player2": {
+      "name": "Player 2",
+      "fargoInfo": "Fargo 480",
+      "score": 0,
+      "timeouts": 1,
+      "extensions": 0,
+      "ratings": {
+        "fargo": 480,
+        "ppd": null,
+        "mpr": null,
+        "display": "fargo",
+        "source": "manual"
+      }
+    },
+    "ballTracker": {
+      "enabled": false,
+      "gameType": "eight",
+      "assignments": {
+        "p1Set": "unassigned",
+        "p2Set": "unassigned"
+      },
+      "pocketed": {}
+    },
+    "custom1": { "label": "Custom 1", "value": "" },
+    "custom2": { "label": "Custom 2", "value": "" }
+  }
+}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DexieWrapper Verification</title>
+    <style>
+      body {
+        font-family: 'Courier New', monospace;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 20px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      h1 {
+        color: #4ec9b0;
+      }
+      pre {
+        background: #252526;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+      .status {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .status.loading {
+        background: #264f78;
+        color: #9cdcfe;
+      }
+      .status.success {
+        background: #1e5f2d;
+        color: #4ec9b0;
+      }
+      .status.error {
+        background: #5f1e1e;
+        color: #f48771;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>DexieWrapper Verification Test</h1>
+    <p>
+      This page verifies that the DexieWrapper correctly reads from the existing
+      <code>pcplscoreboard</code> IndexedDB database.
+    </p>
+
+    <div id="status" class="status loading">Loading verification script...</div>
+    <pre id="console-output"></pre>
+
+    <script type="module">
+      import { verifyDexieWrapper } from '../src/core/database/verify.js';
+
+      const statusDiv = document.getElementById('status');
+      const consoleOutput = document.getElementById('console-output');
+
+      // Capture console logs
+      const originalLog = console.log;
+      const originalError = console.error;
+      const logs = [];
+
+      console.log = (...args) => {
+        originalLog(...args);
+        logs.push(args.join(' '));
+        consoleOutput.textContent = logs.join('\n');
+      };
+
+      console.error = (...args) => {
+        originalError(...args);
+        logs.push('ERROR: ' + args.join(' '));
+        consoleOutput.textContent = logs.join('\n');
+      };
+
+      // Run verification
+      statusDiv.textContent = 'Running verification...';
+      statusDiv.className = 'status loading';
+
+      try {
+        await verifyDexieWrapper();
+        statusDiv.textContent = '✅ Verification Complete - Check console output below';
+        statusDiv.className = 'status success';
+      } catch (error) {
+        statusDiv.textContent = '❌ Verification Failed - ' + error.message;
+        statusDiv.className = 'status error';
+        console.error(error);
+      }
+    </script>
+  </body>
+</html>

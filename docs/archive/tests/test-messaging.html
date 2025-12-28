@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BroadcastChannel Messaging Test - Dock-It.live</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+      }
+      h1 {
+        color: #4ec9b0;
+      }
+      h2 {
+        color: #9cdcfe;
+        margin-top: 30px;
+      }
+      .panel {
+        background: #252526;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 8px;
+        border-left: 4px solid #007acc;
+      }
+      .score-display {
+        font-size: 48px;
+        font-weight: bold;
+        text-align: center;
+        padding: 20px;
+        background: #1e1e1e;
+        border-radius: 8px;
+        margin: 10px 0;
+        color: #4ec9b0;
+      }
+      .status {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        text-align: center;
+      }
+      .status.success {
+        background: #1e5f2d;
+        color: #4ec9b0;
+      }
+      .status.info {
+        background: #264f78;
+        color: #9cdcfe;
+      }
+      .status.warning {
+        background: #5f4e1e;
+        color: #dcdcaa;
+      }
+      button {
+        background: #007acc;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        margin: 5px;
+      }
+      button:hover {
+        background: #005a9e;
+      }
+      button.big {
+        font-size: 24px;
+        padding: 20px 40px;
+      }
+      .message-log {
+        background: #1e1e1e;
+        padding: 15px;
+        border-radius: 5px;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+      }
+      .message-log .msg {
+        padding: 5px;
+        margin: 3px 0;
+        border-left: 3px solid #007acc;
+        padding-left: 10px;
+      }
+      .message-log .msg.sent {
+        border-left-color: #34a853;
+        color: #4ec9b0;
+      }
+      .message-log .msg.received {
+        border-left-color: #fbbc04;
+        color: #dcdcaa;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      code {
+        background: #1e1e1e;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #ce9178;
+      }
+      .highlight {
+        background: #264f78;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📡 Cross-Window Messaging Test</h1>
+    <p>
+      This demonstrates BroadcastChannel communication between Control Panel and Scoreboard.
+    </p>
+
+    <div id="status" class="status info">Initializing messaging...</div>
+
+    <div class="highlight">
+      <strong>🔥 To Test Cross-Window Sync:</strong>
+      <ol>
+        <li>
+          <strong>Open this page in TWO windows side-by-side</strong> (right-click → Duplicate
+          Tab, then drag tab to separate window)
+        </li>
+        <li>Click "+1 Score" in one window</li>
+        <li><strong>Watch the other window update automatically!</strong></li>
+      </ol>
+    </div>
+
+    <h2>Scoreboard (Auto-Syncs Across Windows)</h2>
+    <div class="grid-2">
+      <div class="panel">
+        <h3 style="margin: 0 0 10px 0; color: #9cdcfe">Player 1</h3>
+        <div class="score-display" id="player1-score">0</div>
+        <button class="big" onclick="incrementScore(1)">+1 Score</button>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin: 0 0 10px 0; color: #9cdcfe">Player 2</h3>
+        <div class="score-display" id="player2-score">0</div>
+        <button class="big" onclick="incrementScore(2)">+1 Score</button>
+      </div>
+    </div>
+
+    <h2>Message Log (BroadcastChannel Activity)</h2>
+    <div class="panel">
+      <div class="message-log" id="message-log"></div>
+      <button onclick="clearLog()" style="margin-top: 10px">Clear Log</button>
+    </div>
+
+    <h2>How It Works</h2>
+    <div class="panel">
+      <p><strong>The Complete Flow:</strong></p>
+      <ol>
+        <li>
+          <strong>Window 1:</strong> User clicks "+1 Score"
+        </li>
+        <li>
+          <strong>StateManager:</strong> Writes score to <code>dock_it_db</code> database
+        </li>
+        <li>
+          <strong>MessageBus:</strong> Broadcasts <code>PLAYER_SCORE_CHANGED</code> message via
+          <code>g4-main</code> channel
+        </li>
+        <li>
+          <strong>Window 2:</strong> Receives message, triggers liveQuery subscription
+        </li>
+        <li>
+          <strong>Window 2:</strong> Fetches latest score from database, updates UI
+        </li>
+      </ol>
+
+      <p><strong>Key Concepts:</strong></p>
+      <ul>
+        <li>✅ <strong>Messages are TRIGGERS</strong>, not data carriers</li>
+        <li>✅ Database is single source of truth</li>
+        <li>✅ All windows fetch from same database</li>
+        <li>✅ Prevents circular loops (ignores own messages)</li>
+        <li>✅ Works across tabs, windows, even iframes</li>
+      </ul>
+
+      <p><strong>Code Example:</strong></p>
+      <pre style="background: #1e1e1e; padding: 10px; border-radius: 5px">// Control Panel writes to DB and broadcasts
+await stateManager.incrementScore(1);
+// → Writes to database
+// → Sends PLAYER_SCORE_CHANGED message
+
+// Scoreboard listens for messages
+messageBus.on('PLAYER_SCORE_CHANGED', () => {
+  // Trigger UI refresh from database
+});
+
+// Or use liveQuery (automatic)
+stateManager.subscribeToPlayer1Score(score => {
+  // Updates automatically!
+});</pre>
+    </div>
+
+    <script type="module">
+      import { stateManager } from '../src/core/state/StateManager.js';
+      import { messageBus, MESSAGE_TYPES } from '../src/core/messaging/index.js';
+
+      // Global references
+      window.stateManager = stateManager;
+      window.messageBus = messageBus;
+
+      const statusDiv = document.getElementById('status');
+      const messageLog = document.getElementById('message-log');
+      let messageCount = 0;
+
+      // Helper: Add message to log
+      function logMessage(type, message, isSent = false) {
+        messageCount++;
+        const div = document.createElement('div');
+        div.className = `msg ${isSent ? 'sent' : 'received'}`;
+        const time = new Date().toLocaleTimeString();
+        div.innerHTML = `[${time}] ${isSent ? '📤 SENT' : '📥 RECV'}: <strong>${type}</strong> ${message ? JSON.stringify(message) : ''}`;
+        messageLog.appendChild(div);
+        messageLog.scrollTop = messageLog.scrollHeight;
+      }
+
+      window.clearLog = () => {
+        messageLog.innerHTML = '';
+        messageCount = 0;
+      };
+
+      // Initialize
+      try {
+        await stateManager.init();
+        statusDiv.textContent =
+          '✅ Messaging initialized - Channel: g4-main | Open this page in 2 windows!';
+        statusDiv.className = 'status success';
+
+        logMessage('SYSTEM', 'Messaging initialized on channel: g4-main', false);
+      } catch (error) {
+        statusDiv.textContent = '❌ Failed to initialize: ' + error.message;
+        statusDiv.className = 'status warning';
+        console.error(error);
+      }
+
+      // Subscribe to player scores (liveQuery - automatic updates)
+      stateManager.subscribeToPlayer1Score(score => {
+        document.getElementById('player1-score').textContent = score || 0;
+      });
+
+      stateManager.subscribeToPlayer2Score(score => {
+        document.getElementById('player2-score').textContent = score || 0;
+      });
+
+      // Listen to ALL messages on the bus (for logging)
+      messageBus.onAny((payload, fullMessage) => {
+        // Only log if we didn't send it
+        if (!fullMessage._meta || fullMessage._meta.sender !== 'control-panel') {
+          logMessage(fullMessage.type, payload, false);
+        }
+      });
+
+      // Intercept MessageBus.send to log outgoing messages
+      const originalSend = messageBus.send.bind(messageBus);
+      messageBus.send = (type, payload) => {
+        logMessage(type, payload, true);
+        return originalSend(type, payload);
+      };
+
+      // Button handlers
+      window.incrementScore = async playerNum => {
+        await stateManager.incrementScore(playerNum);
+      };
+
+      console.log('📡 Cross-Window Messaging Ready');
+      console.log('✨ Open this page in 2 windows to test BroadcastChannel sync!');
+      console.log('Channel:', messageBus.CHANNEL_NAME);
+    </script>
+  </body>
+</html>

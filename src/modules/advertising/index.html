@@ -1,0 +1,1057 @@
+<!doctype html>
+<!--
+Dock-It.live Advertising Module
+Premium Add-on for Advertisement Management
+-->
+
+<html>
+<head>
+	<!-- CRITICAL: Theme stylesheets MUST stay in this exact order -->
+	<!-- Relative paths work in both Vite dev server and OBS file:// protocol -->
+	<link rel="stylesheet" href="../../common/css/control_panel/yami.css" />
+	<link rel="stylesheet" href="../../common/css/control_panel/dark.css" />
+	<link rel="stylesheet" href="../../common/css/control_panel/acri.css" />
+	<link rel="stylesheet" href="../../common/css/control_panel/grey.css" />
+	<link rel="stylesheet" href="../../common/css/control_panel/light.css" />
+	<link rel="stylesheet" href="../../common/css/control_panel/rachni.css" />
+	<link rel="stylesheet" href="../../common/css/control_panel/base.css" />
+	<link rel="stylesheet" href="../../common/css/control_panel/layout.css" />
+	<link rel="stylesheet" href="../../common/css/control_panel/components.css" />
+	<link rel="stylesheet" href="../../common/css/control_panel/required.css" />
+
+	<style>
+		/* Ad slot file inputs hidden */
+		#FileUploadAdTop1, #FileUploadAdTop2, #FileUploadAdTop3, #FileUploadAdTop4, #FileUploadAdTop5, #FileUploadAdTop6,
+		#FileUploadAdLeft1, #FileUploadAdLeft2, #FileUploadAdLeft3,
+		#FileUploadAdRight1, #FileUploadAdRight2, #FileUploadAdRight3 {
+			display: none;
+		}
+
+		body.ads-modal-open {
+			overflow: hidden;
+		}
+
+		.ads-color-modal {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.6);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 12px;
+			z-index: 9999;
+			box-sizing: border-box;
+			overflow: hidden;
+			overscroll-behavior: contain;
+		}
+
+		.ads-color-modal__panel {
+			width: min(var(--panel-width, 320px), 100%);
+			max-width: var(--panel-width, 320px);
+			max-height: calc(100vh - 24px);
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+			background: rgba(20, 20, 20, 0.98);
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			border-radius: 14px;
+			padding: 14px;
+			box-sizing: border-box;
+		}
+
+		.ads-color-modal__header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			margin-bottom: 10px;
+		}
+
+		.ads-color-modal__title {
+			font-weight: 700;
+			color: var(--text-primary);
+		}
+
+		.ads-color-modal__close {
+			cursor: pointer;
+			user-select: none;
+			font-weight: 800;
+			width: 28px;
+			height: 28px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.08);
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			color: rgba(255, 255, 255, 0.9);
+		}
+
+		.ads-color-modal__body {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 10px;
+			flex: 1;
+			min-height: 0;
+			overflow: hidden;
+		}
+
+		.ads-color-picker {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 10px;
+			min-height: 0;
+		}
+
+		.ads-color-sv-wrap {
+			position: relative;
+			width: 100%;
+			height: clamp(120px, 22vh, 190px);
+			border-radius: 12px;
+			overflow: hidden;
+			border: 1px solid rgba(255, 255, 255, 0.12);
+		}
+
+		#adsColorSv {
+			width: 100%;
+			height: 100%;
+			display: block;
+			cursor: crosshair;
+			touch-action: none;
+		}
+
+		.ads-color-sv-thumb {
+			position: absolute;
+			width: 14px;
+			height: 14px;
+			border-radius: 999px;
+			border: 2px solid rgba(255, 255, 255, 0.95);
+			box-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+			transform: translate(-7px, -7px);
+			pointer-events: none;
+		}
+
+		.ads-color-row {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			min-width: 0;
+		}
+
+		.ads-color-row__label {
+			min-width: 64px;
+			color: var(--text-primary);
+			font-weight: 600;
+		}
+
+		.ads-color-row input[type="range"] {
+			flex: 1 1 0;
+			min-width: 0;
+		}
+
+		#adsColorAlphaLabel {
+			min-width: 34px;
+			text-align: right;
+			white-space: nowrap;
+			opacity: 0.9;
+		}
+
+		#adsColorHue {
+			-webkit-appearance: none;
+			appearance: none;
+			height: 12px;
+			border-radius: 999px;
+			background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+			outline: none;
+		}
+
+		#adsColorHue::-webkit-slider-runnable-track {
+			height: 12px;
+			border-radius: 999px;
+			background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+		}
+
+		#adsColorHue::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 18px;
+			height: 18px;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.95);
+			border: 2px solid rgba(0, 0, 0, 0.45);
+			margin-top: -3px;
+			box-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+		}
+
+		.ads-row {
+			display: grid;
+			grid-template-columns: 28px 1fr;
+			gap: 8px;
+			align-items: start;
+			padding: 6px 0;
+		}
+
+		.ads-row__label {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 32px;
+			font-weight: 600;
+			color: var(--text-primary);
+			text-align: center;
+		}
+
+		.ads-row__controls {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			align-items: center;
+		}
+
+		.ads-row--blocked {
+			opacity: 0.45;
+			filter: grayscale(1);
+		}
+
+		.ads-span {
+			width: 54px;
+		}
+
+		.ads-dims {
+			font-size: 11px;
+			color: var(--text-secondary, #888);
+			white-space: nowrap;
+		}
+
+		.ads-dims-actual {
+			font-size: 11px;
+			color: var(--text-secondary, #888);
+			white-space: nowrap;
+			margin-left: auto;
+		}
+
+		.ads-dims-actual:empty {
+			display: none;
+		}
+
+		.ads-title {
+			flex: 1 1 100%;
+			min-width: 140px;
+		}
+
+		.ad-preview {
+			position: relative;
+			flex: 1 1 100%;
+			width: 100%;
+			height: 56px;
+			border-radius: 8px;
+			overflow: hidden;
+			background: rgba(0, 0, 0, 0.15);
+			border: 1px solid rgba(255, 255, 255, 0.08);
+			box-sizing: border-box;
+		}
+
+		.ad-preview img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			display: block;
+		}
+
+		.ad-preview__delete {
+			position: absolute;
+			top: 4px;
+			right: 6px;
+			width: 18px;
+			height: 18px;
+			border-radius: 999px;
+			background: rgba(0, 0, 0, 0.55);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			color: rgba(255, 255, 255, 0.9);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 700;
+			cursor: pointer;
+			user-select: none;
+			line-height: 1;
+		}
+
+		.ads-image-modal__panel {
+			width: min(920px, 100%);
+			max-width: 920px;
+			max-height: calc(100vh - 24px);
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+			background: rgba(20, 20, 20, 0.98);
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			border-radius: 14px;
+			padding: 14px;
+			box-sizing: border-box;
+		}
+
+		.ads-image-modal__meta {
+			display: flex;
+			gap: 10px;
+			align-items: center;
+			flex-wrap: wrap;
+			margin-bottom: 10px;
+		}
+
+		.ads-image-meter {
+			flex: 1 1 260px;
+			min-width: 240px;
+			height: 10px;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.12);
+			overflow: hidden;
+		}
+
+		.ads-image-meter__fill {
+			height: 100%;
+			width: 0%;
+			background: linear-gradient(90deg, rgba(80, 200, 120, 0.95), rgba(255, 200, 0, 0.95), rgba(255, 80, 80, 0.95));
+			border-radius: 999px;
+			transition: width 160ms linear;
+		}
+
+		.ads-image-meter__text {
+			font-size: 12px;
+			opacity: 0.9;
+			color: var(--text-primary);
+			white-space: nowrap;
+		}
+
+		.ads-image-grid {
+			flex: 1;
+			min-height: 0;
+			overflow: auto;
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			grid-auto-rows: var(--ads-image-card-h, 136px);
+			align-content: start;
+			max-height: min(
+				calc((var(--ads-image-card-h, 136px) * 6) + (10px * 5) + 8px),
+				calc(100vh - 240px)
+			);
+			gap: 10px;
+			padding: 4px;
+			border: 1px solid rgba(255, 255, 255, 0.08);
+			border-radius: 12px;
+			background: rgba(0, 0, 0, 0.16);
+		}
+
+		@media (min-width: 720px) {
+			.ads-image-grid {
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+			}
+		}
+
+		@media (min-width: 980px) {
+			.ads-image-grid {
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+			}
+		}
+
+		.ads-image-card {
+			position: relative;
+			display: grid;
+			grid-template-rows: 96px auto;
+			border-radius: 12px;
+			overflow: hidden;
+			border: 1px solid rgba(255, 255, 255, 0.10);
+			background: rgba(0, 0, 0, 0.28);
+			cursor: pointer;
+			height: var(--ads-image-card-h, 136px);
+		}
+
+		.ads-image-card__thumb {
+			width: 100%;
+			height: 96px;
+			background: #f6f4ef;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 6px;
+			box-sizing: border-box;
+		}
+
+		.ads-image-card__thumb img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			display: block;
+		}
+
+		.ads-image-card__info {
+			padding: 8px;
+			display: grid;
+			gap: 2px;
+			font-size: 11px;
+			color: rgba(255, 255, 255, 0.88);
+		}
+
+		.ads-image-card__name {
+			font-weight: 700;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.ads-image-card__meta {
+			font-size: 10px;
+			opacity: 0.75;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.ads-image-card__delete {
+			position: absolute;
+			top: 6px;
+			right: 6px;
+			width: 22px;
+			height: 22px;
+			border-radius: 999px;
+			background: rgba(0, 0, 0, 0.60);
+			border: 1px solid rgba(255, 255, 255, 0.20);
+			color: rgba(255, 255, 255, 0.95);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 800;
+			cursor: pointer;
+			user-select: none;
+			line-height: 1;
+		}
+
+		.ads-image-modal__footer {
+			display: flex;
+			justify-content: space-between;
+			gap: 10px;
+			margin-top: 10px;
+			flex-wrap: wrap;
+		}
+
+		.ads-confirm-body {
+			display: grid;
+			gap: 10px;
+			color: var(--text-primary);
+		}
+
+		.ads-confirm-message {
+			font-weight: 600;
+			line-height: 1.35;
+		}
+
+		.ads-confirm-actions {
+			display: flex;
+			justify-content: flex-end;
+			gap: 10px;
+			flex-wrap: wrap;
+			margin-top: 6px;
+		}
+	</style>
+
+	<script>
+	var versionNum = "3.0.0";
+	</script>
+
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+</head>
+<body>
+	<header class="panel-header">
+		<span class="version-text">Advertising Module v<span id="verNum"></span></span>
+	</header>
+
+	<div id="mainDiv">
+		<section class="section-card" id="adsSection">
+			<div class="section-card__title">Advertisement Management</div>
+
+			<!-- Tab Buttons -->
+			<div class="grid-section" style="grid-template-columns: 1fr 1fr; gap: var(--grid-gap);">
+				<div class="btn btn--primary hover obs28" id="adsTabAds">Ads</div>
+				<div class="btn hover obs28" id="adsTabSettings">Settings</div>
+			</div>
+
+			<div id="adsPanelAds">
+				<div class="checkbox-row">
+				<div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+					<label class="checkbox-label" style="margin:0; display:flex; align-items:center; gap:8px;">
+						<span>Background</span>
+						<span id="adsFrameBgOpen" style="cursor:pointer; font-weight:700; text-decoration: underline;">Select Color</span>
+						<span id="adsFrameBgSummary" style="min-width: 90px; opacity: 0.9;"></span>
+					</label>
+				</div>
+				</div>
+
+				<div class="grid-section grid-cols-1" id="adsRows">
+				<!-- Top Ads (T1-T6) -->
+				<div class="ads-row" data-region="top" data-index="1">
+					<div class="ads-row__label">T1</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdTop1">
+							<input type="file" id="FileUploadAdTop1" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adTop1Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop1Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop1Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x180</span>
+						<span class="ads-dims-actual" id="adTop1DimsActual"></span>
+						<div class="ad-preview noShow" id="adTop1Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adTop1Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adTop1Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<div class="ads-row" data-region="top" data-index="2">
+					<div class="ads-row__label">T2</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdTop2">
+							<input type="file" id="FileUploadAdTop2" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adTop2Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop2Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop2Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x180</span>
+						<span class="ads-dims-actual" id="adTop2DimsActual"></span>
+						<div class="ad-preview noShow" id="adTop2Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adTop2Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adTop2Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<div class="ads-row" data-region="top" data-index="3">
+					<div class="ads-row__label">T3</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdTop3">
+							<input type="file" id="FileUploadAdTop3" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adTop3Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop3Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop3Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x180</span>
+						<span class="ads-dims-actual" id="adTop3DimsActual"></span>
+						<div class="ad-preview noShow" id="adTop3Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adTop3Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adTop3Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<div class="ads-row" data-region="top" data-index="4">
+					<div class="ads-row__label">T4</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdTop4">
+							<input type="file" id="FileUploadAdTop4" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adTop4Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop4Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop4Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x180</span>
+						<span class="ads-dims-actual" id="adTop4DimsActual"></span>
+						<div class="ad-preview noShow" id="adTop4Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adTop4Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adTop4Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<div class="ads-row" data-region="top" data-index="5">
+					<div class="ads-row__label">T5</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdTop5">
+							<input type="file" id="FileUploadAdTop5" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adTop5Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop5Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop5Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x180</span>
+						<span class="ads-dims-actual" id="adTop5DimsActual"></span>
+						<div class="ad-preview noShow" id="adTop5Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adTop5Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adTop5Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<div class="ads-row" data-region="top" data-index="6">
+					<div class="ads-row__label">T6</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdTop6">
+							<input type="file" id="FileUploadAdTop6" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adTop6Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop6Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adTop6Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x180</span>
+						<span class="ads-dims-actual" id="adTop6DimsActual"></span>
+						<div class="ad-preview noShow" id="adTop6Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adTop6Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adTop6Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<!-- Left Ads (L1-L3) -->
+				<div class="ads-row" data-region="left" data-index="1">
+					<div class="ads-row__label">L1</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdLeft1">
+							<input type="file" id="FileUploadAdLeft1" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adLeft1Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adLeft1Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adLeft1Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x360</span>
+						<span class="ads-dims-actual" id="adLeft1DimsActual"></span>
+						<div class="ad-preview noShow" id="adLeft1Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adLeft1Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adLeft1Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<div class="ads-row" data-region="left" data-index="2">
+					<div class="ads-row__label">L2</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdLeft2">
+							<input type="file" id="FileUploadAdLeft2" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adLeft2Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adLeft2Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adLeft2Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x360</span>
+						<span class="ads-dims-actual" id="adLeft2DimsActual"></span>
+						<div class="ad-preview noShow" id="adLeft2Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adLeft2Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adLeft2Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<div class="ads-row" data-region="left" data-index="3">
+					<div class="ads-row__label">L3</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdLeft3">
+							<input type="file" id="FileUploadAdLeft3" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adLeft3Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adLeft3Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adLeft3Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x360</span>
+						<span class="ads-dims-actual" id="adLeft3DimsActual"></span>
+						<div class="ad-preview noShow" id="adLeft3Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adLeft3Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adLeft3Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<!-- Right Ads (R1-R3) -->
+				<div class="ads-row" data-region="right" data-index="1">
+					<div class="ads-row__label">R1</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdRight1">
+							<input type="file" id="FileUploadAdRight1" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adRight1Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adRight1Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adRight1Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x360</span>
+						<span class="ads-dims-actual" id="adRight1DimsActual"></span>
+						<div class="ad-preview noShow" id="adRight1Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adRight1Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adRight1Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<div class="ads-row" data-region="right" data-index="2">
+					<div class="ads-row__label">R2</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdRight2">
+							<input type="file" id="FileUploadAdRight2" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adRight2Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adRight2Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adRight2Show" checked>
+							<span>Show</span>
+						</label>
+						<span class="ads-dims">320x360</span>
+						<span class="ads-dims-actual" id="adRight2DimsActual"></span>
+						<div class="ad-preview noShow" id="adRight2Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adRight2Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adRight2Title" placeholder="Title (optional)">
+					</div>
+				</div>
+
+				<div class="ads-row" data-region="right" data-index="3">
+					<div class="ads-row__label">R3</div>
+					<div class="ads-row__controls">
+						<div class="btn tooltip hover obs28" id="triggerAdRight3">
+							<input type="file" id="FileUploadAdRight3" accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+							Upload
+						</div>
+						<select class="select-field ads-span obs28" id="adRight3Span">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adRight3Frame">
+							<span>Frame</span>
+						</label>
+						<label class="checkbox-label">
+							<input type="checkbox" class="smallSize" id="adRight3Show" checked>
+							<span>Show</span>
+						</label>
+						<div class="ads-dims-group">
+							<span class="ads-dims">320x360</span>
+							<span class="ads-dims-actual" id="adRight3DimsActual"></span>
+						</div>
+						<div class="ad-preview noShow" id="adRight3Preview">
+							<div class="ad-preview__delete">X</div>
+							<img id="adRight3Img" src="" alt="">
+						</div>
+						<input type="text" class="input-field ads-title" id="adRight3Title" placeholder="Title (optional)">
+					</div>
+				</div>
+				</div>
+			</div>
+
+			<div id="adsPanelSettings" class="noShow">
+				<!-- Master Region Toggles (U-Shape Layout) -->
+				<div style="margin-bottom: 16px; padding: 8px; background: rgba(255, 255, 255, 0.03); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.08);">
+					<div style="font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Region Visibility</div>
+
+					<!-- Row 1: Top Toggle (Centered) -->
+					<div style="display: flex; justify-content: center; margin-bottom: 8px;">
+						<label class="checkbox-label" style="margin:0; display:flex; align-items:center; gap:6px;">
+							<input type="checkbox" class="smallSize" id="adsShowTopChk" checked>
+							<span style="font-weight: 600; font-size: 13px;">Top (T1-T6)</span>
+						</label>
+					</div>
+
+					<!-- Row 2: Left and Right Toggles -->
+					<div style="display: flex; justify-content: space-between; align-items: center;">
+						<label class="checkbox-label" style="margin:0; display:flex; align-items:center; gap:6px;">
+							<input type="checkbox" class="smallSize" id="adsShowLeftChk" checked>
+							<span style="font-weight: 600; font-size: 13px;">Left (L1-L3)</span>
+						</label>
+						<label class="checkbox-label" style="margin:0; display:flex; align-items:center; gap:6px;">
+							<input type="checkbox" class="smallSize" id="adsShowRightChk" checked>
+							<span style="font-weight: 600; font-size: 13px;">Right (R1-R3)</span>
+						</label>
+					</div>
+				</div>
+
+				<div class="checkbox-row">
+					<div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+						<label class="checkbox-label" style="margin:0;">
+							<input type="checkbox" class="smallSize" id="adsFrameArtChk">
+							<span>Show Dividers</span>
+						</label>
+					</div>
+				</div>
+
+				<!-- Layout Preview Mini-Map -->
+				<div style="margin-top: 20px;">
+					<div style="font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Layout Preview</div>
+					<div id="adsLayoutMinimap" style="
+						width: 100%;
+						max-width: 400px;
+						aspect-ratio: 16 / 9;
+						background: rgba(0, 0, 0, 0.3);
+						border: 1px solid rgba(255, 255, 255, 0.15);
+						border-radius: 8px;
+						position: relative;
+						overflow: hidden;
+					">
+						<!-- Top bar -->
+						<div id="minimapTop" style="
+							position: absolute;
+							top: 0;
+							left: 0;
+							right: 0;
+							height: 16%;
+							background: rgba(100, 200, 255, 0.5);
+							border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+							transition: height 0.3s ease, opacity 0.3s ease;
+						"></div>
+
+						<!-- Left bar -->
+						<div id="minimapLeft" style="
+							position: absolute;
+							top: 16%;
+							left: 0;
+							bottom: 16%;
+							width: 13%;
+							background: rgba(255, 200, 100, 0.5);
+							border-right: 2px solid rgba(255, 255, 255, 0.3);
+							transition: width 0.3s ease, opacity 0.3s ease, top 0.3s ease, bottom 0.3s ease;
+						"></div>
+
+						<!-- Right bar -->
+						<div id="minimapRight" style="
+							position: absolute;
+							top: 16%;
+							right: 0;
+							bottom: 16%;
+							width: 13%;
+							background: rgba(255, 150, 100, 0.5);
+							border-left: 2px solid rgba(255, 255, 255, 0.3);
+							transition: width 0.3s ease, opacity 0.3s ease, top 0.3s ease, bottom 0.3s ease;
+						"></div>
+
+						<!-- Center (play area) -->
+						<div style="
+							position: absolute;
+							top: 16%;
+							left: 13%;
+							right: 13%;
+							bottom: 16%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							color: rgba(255, 255, 255, 0.5);
+							font-size: 12px;
+							font-weight: 600;
+							text-align: center;
+							padding: 10px;
+						">Play Area<br/>(Scoreboard at bottom)</div>
+
+						<!-- Bottom scoreboard indicator -->
+						<div style="
+							position: absolute;
+							bottom: 0;
+							left: 13%;
+							right: 13%;
+							height: 16%;
+							background: rgba(150, 255, 150, 0.5);
+							border-top: 2px solid rgba(255, 255, 255, 0.3);
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							color: rgba(255, 255, 255, 0.7);
+							font-size: 10px;
+							font-weight: 600;
+						">Scoreboard</div>
+					</div>
+
+					<div style="margin-top: 10px; font-size: 11px; opacity: 0.8; color: var(--text-secondary);">
+						Toggle regions above to preview the layout changes
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<!-- Advertising Modals -->
+	<div id="adsFrameBgModal" class="ads-color-modal noShow" style="display: none;">
+		<div class="ads-color-modal__panel">
+			<div class="ads-color-modal__header">
+				<div class="ads-color-modal__title">Select Background</div>
+				<div class="ads-color-modal__close" id="adsFrameBgClose">X</div>
+			</div>
+			<div class="ads-color-modal__body">
+				<div class="ads-color-picker">
+					<div class="ads-color-sv-wrap">
+						<canvas id="adsColorSv" width="600" height="440"></canvas>
+						<div id="adsColorSvThumb" class="ads-color-sv-thumb"></div>
+					</div>
+					<div class="ads-color-row">
+						<div class="ads-color-row__label">Hue</div>
+						<input type="range" id="adsColorHue" min="0" max="360" step="1" value="270">
+					</div>
+					<div class="ads-color-row">
+						<div class="ads-color-row__label">Transparency</div>
+						<input type="range" id="adsColorAlpha" min="0" max="100" step="1" value="0">
+						<div id="adsColorAlphaLabel">0%</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="adsImagePickerModal" class="ads-color-modal noShow" style="display: none;">
+		<div class="ads-image-modal__panel">
+			<div class="ads-color-modal__header">
+				<div class="ads-color-modal__title">Select Image</div>
+				<div class="ads-color-modal__close" id="adsImagePickerClose">X</div>
+			</div>
+			<div class="ads-image-modal__meta">
+				<div class="ads-image-meter"><div id="adsImageMeterFill" class="ads-image-meter__fill"></div></div>
+				<div id="adsImageMeterText" class="ads-image-meter__text"></div>
+			</div>
+			<div id="adsImageGrid" class="ads-image-grid"></div>
+			<div class="ads-image-modal__footer">
+				<div class="btn btn--primary hover obs28" id="adsPickUploadNew">Upload New</div>
+				<div class="btn hover obs28" id="adsImagePickerCancel">Cancel</div>
+			</div>
+			<input type="file" id="adsImagePickerFile" style="display:none" multiple accept="image/png, image/jpeg, image/svg+xml, image/bmp" />
+		</div>
+	</div>
+
+	<div id="adsDeleteConfirmModal" class="ads-color-modal noShow" style="display: none;">
+		<div class="ads-color-modal__panel">
+			<div class="ads-color-modal__header">
+				<div class="ads-color-modal__title">Confirm Delete</div>
+				<div class="ads-color-modal__close" id="adsDeleteConfirmClose">X</div>
+			</div>
+			<div class="ads-confirm-body">
+				<div class="ads-confirm-message" id="adsDeleteConfirmMessage">Delete this stored image?</div>
+				<label class="checkbox-label" style="margin:0; display:flex; align-items:center; gap:8px;">
+					<input type="checkbox" class="smallSize" id="adsDeleteConfirmDontShow">
+					<span>Don't show again</span>
+				</label>
+				<div class="ads-confirm-actions">
+					<div class="btn btn--primary hover obs28" id="adsConfirmDeleteBtn">Delete</div>
+					<div class="btn hover obs28" id="adsConfirmCancelBtn">Cancel</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Load Modern Controller as ES Module -->
+	<script type="module" src="./AdvertisingController.js"></script>
+	<script>
+		document.getElementById('verNum').textContent = versionNum;
+	</script>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

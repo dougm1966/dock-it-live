@@ -1,0 +1,351 @@
+<!doctype html>
+<!--
+Dock-It.live Player Management Module
+Player roster database with ratings, countries, and photos
+-->
+
+<html>
+<head>
+	<meta charset="UTF-8">
+	<!-- CRITICAL: Theme stylesheets MUST stay in this exact order -->
+	<!-- Relative paths work in both Vite dev server and OBS file:// protocol -->
+	<link rel="stylesheet" href="../../../common/css/control_panel/yami.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/dark.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/acri.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/grey.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/light.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/rachni.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/base.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/layout.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/components.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/required.css" />
+
+	<style>
+		/* ============================================================ */
+		/* STANDALONE PLAYER MANAGER STYLES */
+		/* ============================================================ */
+
+		/* Table Styles */
+		.player-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 15px;
+		}
+
+		.player-table th,
+		.player-table td {
+			padding: 10px;
+			text-align: left;
+			border-bottom: 1px solid var(--border-color);
+		}
+
+		.player-table th {
+			background-color: var(--bg-secondary);
+			font-weight: 600;
+			font-size: 0.9em;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		.player-table tr:hover {
+			background-color: var(--bg-hover);
+		}
+
+		.player-table .action-buttons {
+			display: flex;
+			gap: 5px;
+			flex-wrap: wrap;
+		}
+
+		.player-table .action-buttons .btn {
+			padding: 4px 8px;
+			font-size: 0.8em;
+			min-width: 50px;
+		}
+
+		/* Search Bar */
+		.search-bar {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 15px;
+		}
+
+		.search-bar input {
+			flex: 1;
+		}
+
+		/* Status Display */
+		#playerStatusDisplay {
+			display: inline-block;
+			margin-left: 15px;
+			font-size: 0.9em;
+			font-weight: 500;
+			transition: opacity 0.3s;
+			opacity: 0;
+		}
+
+		/* Dock Mode Toggle Button */
+		.dock-mode-toggle {
+			background-color: var(--btn-bg);
+			color: var(--text-primary);
+			border: 1px solid var(--border-color);
+			padding: 5px 12px;
+			font-size: 0.85em;
+			cursor: pointer;
+			border-radius: 4px;
+			transition: all 0.2s;
+			margin-left: auto;
+		}
+
+		.dock-mode-toggle:hover {
+			background-color: var(--btn-hover-bg);
+			border-color: var(--accent-color);
+		}
+
+		.dock-mode-toggle.active {
+			background-color: var(--accent-color);
+			color: #fff;
+			border-color: var(--accent-color);
+		}
+
+		/* ============================================================ */
+		/* DOCK MODE: Compact UI for OBS Side Panels */
+		/* ============================================================ */
+		body.dock-mode .panel-header {
+			display: none;
+		}
+
+		body.dock-mode #mainDiv {
+			padding: 10px;
+			overflow-y: auto;
+			max-height: calc(100vh - 10px);
+		}
+
+		body.dock-mode .section-card {
+			margin-bottom: 15px;
+			padding: 10px;
+		}
+
+		body.dock-mode .section-card__title {
+			font-size: 0.9em;
+			margin-bottom: 8px;
+		}
+
+		body.dock-mode .input-row {
+			margin-bottom: 8px;
+		}
+
+		body.dock-mode .input-row label {
+			font-size: 0.85em;
+			min-width: 60px;
+		}
+
+		body.dock-mode .input-field,
+		body.dock-mode .select-field {
+			font-size: 0.85em;
+			padding: 6px 8px;
+		}
+
+		body.dock-mode .btn {
+			font-size: 0.85em;
+			padding: 6px 10px;
+		}
+
+		body.dock-mode .player-table th,
+		body.dock-mode .player-table td {
+			padding: 6px;
+			font-size: 0.85em;
+		}
+
+		body.dock-mode .player-table .action-buttons .btn {
+			padding: 3px 6px;
+			font-size: 0.75em;
+			min-width: 45px;
+		}
+
+		/* Dock Mode Floating Toggle (visible in dock mode) */
+		.dock-mode-float-toggle {
+			position: fixed;
+			top: 5px;
+			right: 5px;
+			z-index: 1000;
+			background-color: rgba(0, 0, 0, 0.7);
+			color: #fff;
+			border: 1px solid rgba(255, 255, 255, 0.3);
+			padding: 4px 8px;
+			font-size: 0.75em;
+			cursor: pointer;
+			border-radius: 3px;
+			display: none;
+			transition: all 0.2s;
+		}
+
+		body.dock-mode .dock-mode-float-toggle {
+			display: block;
+		}
+
+		.dock-mode-float-toggle:hover {
+			background-color: rgba(0, 0, 0, 0.9);
+			border-color: rgba(255, 255, 255, 0.6);
+		}
+
+		/* Ensure scrolling in normal mode */
+		#mainDiv {
+			overflow-y: auto;
+			max-height: calc(100vh - 60px);
+		}
+	</style>
+
+	<script>
+	var versionNum = "1.0.0"; // Player Management Module
+	</script>
+
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+	<title>Player Management Module</title>
+</head>
+<body>
+
+	<!-- Fixed Header -->
+	<header class="panel-header">
+		<span class="version-text">Player Management v<span id="verNum"></span> (Pro)</span>
+		<span id="playerStatusDisplay"></span>
+		<button class="dock-mode-toggle" id="dockModeToggle" title="Toggle Dock Mode for OBS">
+			Dock Mode
+		</button>
+	</header>
+
+	<!-- Floating Dock Mode Toggle (visible only in dock mode) -->
+	<button class="dock-mode-float-toggle" id="dockModeFloatToggle" title="Exit Dock Mode">
+		Exit Dock Mode
+	</button>
+
+	<div id="mainDiv">
+
+		<!-- =================================================================== -->
+		<!-- SECTION: Add Player -->
+		<!-- =================================================================== -->
+		<section class="section-card" id="addPlayerSection">
+			<div class="section-card__title">
+				<span class="section-title-text">Add Player to Roster</span>
+			</div>
+
+			<!-- Player Name -->
+			<div class="input-row">
+				<label>Name:</label>
+				<input
+					type="text"
+					id="playerNameInput"
+					class="input-field"
+					placeholder="e.g., John Smith"
+					autocomplete="off"
+				/>
+			</div>
+
+			<!-- Player Rating (Fargo) -->
+			<div class="input-row">
+				<label>Rating:</label>
+				<input
+					type="text"
+					id="playerRatingInput"
+					class="input-field"
+					placeholder="e.g., 650 (Fargo)"
+					autocomplete="off"
+				/>
+			</div>
+
+			<!-- Player Country -->
+			<div class="input-row">
+				<label>Country:</label>
+				<input
+					type="text"
+					id="playerCountryInput"
+					class="input-field"
+					placeholder="e.g., USA, UK, Canada"
+					autocomplete="off"
+				/>
+			</div>
+
+			<!-- Player Sport -->
+			<div class="input-row">
+				<label>Sport:</label>
+				<select id="playerSportSelect" class="select-field">
+					<option value="billiards">Billiards/Pool</option>
+					<option value="darts">Darts</option>
+					<option value="other">Other</option>
+				</select>
+			</div>
+
+			<!-- Add Player Button -->
+			<div class="input-row">
+				<button class="btn hover greenBtn" id="addPlayerBtn" style="width: 100%;">
+					Add Player to Roster
+				</button>
+			</div>
+
+			<!-- CSV Import (Compact) -->
+			<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+				<input
+					type="file"
+					id="csvImportInput"
+					accept=".csv,.xlsx,.xls"
+					style="display: none;"
+				/>
+				<button class="btn hover" id="csvImportBtn" style="width: 100%; font-size: 0.9em; padding: 8px;">
+					📥 Import CSV/Excel
+				</button>
+
+				<!-- Import Status -->
+				<div id="importStatus" style="display: none; margin-top: 8px; padding: 8px; background: var(--bg-secondary); border-radius: 4px; font-size: 0.85em;">
+					<strong>Import:</strong> <span id="importStatusText"></span>
+				</div>
+			</div>
+		</section>
+
+		<!-- =================================================================== -->
+		<!-- SECTION: Player List -->
+		<!-- =================================================================== -->
+		<section class="section-card" id="playerListSection">
+			<div class="section-card__title">
+				<span class="section-title-text">
+					Player Roster (<span id="playerCountDisplay">0</span>)
+				</span>
+			</div>
+
+			<!-- Search Bar -->
+			<div class="search-bar">
+				<input
+					type="text"
+					id="playerSearchInput"
+					class="input-field"
+					placeholder="Search players by name..."
+					autocomplete="off"
+				/>
+				<select id="sportFilterSelect" class="select-field" style="width: auto;">
+					<option value="">All Sports</option>
+					<option value="billiards">Billiards</option>
+					<option value="darts">Darts</option>
+					<option value="other">Other</option>
+				</select>
+				<button class="btn hover" id="clearSearchBtn">Clear</button>
+			</div>
+
+			<!-- Player List Container -->
+			<div id="playerListContainer">
+				<div style="text-align: center; padding: 40px; color: var(--text-muted);">
+					<p>Loading players...</p>
+				</div>
+			</div>
+		</section>
+
+	</div>
+
+	<!-- Load the Player Controller -->
+	<script type="module" src="./PlayerController.js"></script>
+
+	<script>
+		// Display version number
+		document.getElementById('verNum').textContent = versionNum;
+	</script>
+
+</body>
+</html>

@@ -1,3 +1,27 @@
+# Dock-It.live (Modernization of PCPL ScoreBoard)
+
+## ⚠️ THE THREE LAWS (MANDATORY)
+1. **MODULAR SKELETON**: All new code in `src/`. Logic must be split between `src/core` (Universal) and `src/modules/billiards` (Sport-specific). No dumping files in the root.
+2. **DATABASE TRUTH**: This project uses **IndexedDB** (`pcplscoreboard`), managed by the `PCPLImageDB` class. We are migrating to **Dexie.js** with zero data loss. Ignore all references to localStorage for state.
+3. **MODERN STANDARDS**: ES6 Modules + Dexie.js + Tailwind CSS. NO jQuery in the new `src/` directory.
+
+## Project Status: PHASE 1 (Foundation)
+- **Goal**: Initializing the 'Universal Core' and migrating the Database.
+- **State Pattern**: Reactive Database-first state. (BroadcastChannel messages are triggers, the Database is the data carrier).
+
+## Directory Tree (The Gold Standard)
+- `src/core/database/`: Dexie.js initialization & `pcplscoreboard` migration logic.
+- `src/core/state/`: Centralized StateManager (Single Source of Truth).
+- `src/core/messaging/`: BroadcastChannel (`g4-main`) logic.
+- `src/modules/billiards/`: Shot-clock and Score logic refactored from legacy.
+- `common/`: LEGACY CODE ONLY (Reference for refactoring).
+
+## Legacy Reference (To be Refactored)
+- **Original DB**: `PCPLImageDB` (IndexedDB) in `common/js/idb_images.js`.
+- **Original Messaging**: `BroadcastChannel` (channel: `g4-main`).
+- **Original Logic**: jQuery-based DOM manipulation in `common/js/control_panel.js`.
+
+
 # PCPL ScoreBoard
 
 A professional billiard/pool scoreboard solution for OBS Studio streamers.

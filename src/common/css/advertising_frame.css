@@ -1,0 +1,134 @@
+html,
+body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	background: transparent;
+}
+
+body {
+	position: relative;
+	--ads-divider-alpha: 0.35;
+	--ads-divider-rgb: 255, 255, 255;
+	--ads-inner-corner-radius: 16px;
+}
+
+#frameRoot {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 1920px;
+	height: 1080px;
+	background: transparent;
+	transform-origin: top left;
+	display: grid;
+	--ads-top-h: 125px;
+	--ads-left-w: 125px;
+	--ads-right-w: 125px;
+	grid-template-columns: var(--ads-left-w) 1fr var(--ads-right-w);
+	grid-template-rows: var(--ads-top-h) 1fr;
+	grid-template-areas:
+		"top top top"
+		"left center right";
+}
+
+#adsTop {
+	grid-area: top;
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	grid-template-rows: 1fr;
+	gap: 4px;
+	background: transparent;
+	z-index: 2;
+	padding-left: 4px !important;
+	padding-right: 4px !important;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+#adsLeft {
+	grid-area: left;
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: repeat(3, 1fr);
+	gap: 4px;
+	background: transparent;
+	z-index: 2;
+	border-top-right-radius: var(--ads-inner-corner-radius);
+	overflow: hidden;
+}
+
+#adsRight {
+	grid-area: right;
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: repeat(3, 1fr);
+	gap: 4px;
+	background: transparent;
+	z-index: 2;
+	border-top-left-radius: var(--ads-inner-corner-radius);
+	overflow: hidden;
+}
+
+.ad-tile {
+	position: relative;
+	overflow: hidden;
+	background: transparent;
+	box-shadow: none;
+}
+
+.ads-divider {
+	position: absolute;
+	pointer-events: none;
+	background: rgba(var(--ads-divider-rgb, 255, 255, 255), var(--ads-divider-alpha, 0.35));
+	z-index: 3;
+}
+
+.ads-divider--v {
+	top: 10%;
+	height: 80%;
+	width: 2px;
+	transform: translateX(-1px);
+}
+
+.ads-divider--h {
+	left: 10%;
+	width: 80%;
+	height: 2px;
+	transform: translateY(-1px);
+}
+
+.ad-tile img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	display: block;
+}
+
+.ad-title {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	color: rgba(var(--ads-divider-rgb, 255, 255, 255), 0.95);
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: 700;
+	font-size: 28px;
+	letter-spacing: 0.5px;
+	text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
+	padding: 8px;
+	box-sizing: border-box;
+}
+
+.ad-title--placeholder {
+	opacity: 0.8;
+	font-size: 20px;
+	letter-spacing: 0.2px;
+}

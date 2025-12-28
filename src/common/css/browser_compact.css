@@ -1,0 +1,215 @@
+/*
+  Browser Compact CSS
+  PCPL ScoreBoard - Compact scoreboard variant
+  Inspired by g4ScoreBoard concept
+  GitHub: https://github.com/dougm1966/g4ScoreBoard
+  Park County Pool League
+*/
+
+#scoreBoardDiv {
+	font-family: tahoma;
+	font-weight: bold;
+	font-size: 15pt;
+	position: absolute;
+	bottom: 10px;
+	width: 90%;
+	left: 5%;
+	z-index: 2;
+}
+
+table {
+	border: 0px solid #000;
+}
+
+td {
+	border: 2px solid #000;
+	border-radius: 5px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.noShow {
+	visibility: hidden;
+}
+
+#player1Name {
+	background-image: linear-gradient(to left, white, steelblue);
+	text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+#player2Name {
+	background-image: linear-gradient(to right, white, steelblue);
+	text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+#p1ExtIcon {
+	position: absolute;
+	left: 573px;
+	top: 0;
+	bottom: 0;
+	height: 100%;
+	background: green;
+	border: solid 1px #000;
+	border-radius: 4px 0px 0px 5px;
+	border-right: none;
+	color: #fff;
+	font-size: 8.75pt;
+	font-weight: 300;
+	padding: 0;
+	z-index: 10;
+	/* Center text vertically within the icon */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* Fixed width for consistent sizing */
+	width: 28px;
+}
+
+#p2ExtIcon {
+	position: absolute;
+	right: 573px;
+	top: 0;
+	bottom: 0;
+	height: 100%;
+	background: green;
+	border: solid 1px #000;
+	border-radius: 0px 4px 4px 0px;
+	border-left: none;
+	color: #fff;
+	font-size: 8.75pt;
+	font-weight: 300;
+	padding: 0;
+	z-index: 10;
+	/* Center text vertically within the icon */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* Fixed width for consistent sizing */
+	width: 28px;
+}
+
+.greenBtn {
+	background: green;
+	color: white;
+}
+
+.redBtn {
+	background: red;
+	color: white;
+}
+
+.shotRed {
+	color: white;
+}
+
+.fadeInElm {
+	visibility: visible;
+	opacity: 1;
+	transition: opacity 1s linear;
+}
+
+.fadeOutElm {
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 0s 1s, opacity 1s linear;
+}
+
+/* Blink Animations */
+@keyframes blinking {
+	0% {
+		background-color: #ffffff;
+	}
+	100% {
+		background-color: lightgreen;
+	}
+}
+
+.winBlink {
+	animation: blinking .10s 4;
+}
+
+@keyframes extblinking {
+	0% {
+		background-color: green;
+	}
+	100% {
+		background-color: red;
+	}
+}
+
+.extBlink {
+	animation: extblinking .15s 3;
+}
+
+#raceInfo {
+	background-image: linear-gradient(to right, grey, white);
+	position: fixed;
+	bottom: 11px;
+	width: 245px;
+	left: 670px;
+	border-radius: 0px 00px 10px 10px;
+	text-align: center;
+	padding-top: 2px;
+	padding-bottom: 1px;
+	font-size: 12pt;
+	font-weight: bolder;
+	border: 1px solid #000;
+	z-index: 0;
+}
+
+#wagerInfo {
+	background-image: linear-gradient(to left, grey, white);
+	position: fixed;
+	bottom: 11px;
+	right: 10px;
+	z-index: 0;
+}
+
+#salottoLogo {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	right: 823px;
+	z-index: 9;
+	visibility: hidden;
+}
+
+#g4Logo {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	left: 823px;
+	z-index: 9;
+	visibility: hidden;
+}
+
+#shotClock {
+	width: 575px;
+	text-align: center;
+	font-size: 12pt;
+	vertical-align: bottom;
+	position: relative;
+	padding-bottom: 2px;
+	top: -3px;
+	z-index: -2;
+	border-radius: 0px 00px 10px 10px;
+}
+
+/* Logo Slideshow Styles */
+.slideshow-container {
+	position: relative;
+}
+
+.logoSlide {
+	display: none;
+}
+
+.logoSlide.fade {
+	animation-name: fade;
+	animation-duration: 1.5s;
+}
+
+@keyframes fade {
+	from {opacity: .4}
+	to {opacity: 1}
+}

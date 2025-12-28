@@ -1,0 +1,135 @@
+<!doctype html>
+<!--
+Dock-It.live Billiards Module
+Specialty controls for billiards: Ball Tracker, Shot Clock, Extensions
+Player names/scores managed in Master Control Panel
+-->
+
+<html>
+<head>
+	<!-- CRITICAL: Theme stylesheets MUST stay in this exact order -->
+	<!-- Relative paths work in both Vite dev server and OBS file:// protocol -->
+	<link rel="stylesheet" href="../../../common/css/control_panel/yami.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/dark.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/acri.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/grey.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/light.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/rachni.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/base.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/layout.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/components.css" />
+	<link rel="stylesheet" href="../../../common/css/control_panel/required.css" />
+
+	<script>
+	var versionNum = "3.1.0"; // Billiards Module
+	</script>
+
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+	<title>Billiards Module</title>
+</head>
+<body>
+
+	<!-- Fixed Header -->
+	<header class="panel-header">
+		<span class="version-text">Billiards Module v<span id="verNum"></span></span>
+		<span id="updateStatus"></span>
+	</header>
+
+	<div id="mainDiv">
+
+		<!-- =================================================================== -->
+		<!-- SECTION: Ball Tracker -->
+		<!-- =================================================================== -->
+		<section class="section-card" id="ballTrackerSection">
+			<div class="section-card__title">
+				<span class="section-title-text">Ball Tracker</span>
+			</div>
+
+			<!-- Ball Tracker Enable Toggle -->
+			<div class="checkbox-row">
+				<label class="checkbox-label">
+					<input type="checkbox" id="btEnableChk">
+					<span>Enable Ball Tracker</span>
+				</label>
+			</div>
+
+			<!-- Game Type Selector -->
+			<div class="input-row">
+				<label>Game Type:</label>
+				<div class="grid-section" id="btGameGrid" style="grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px;">
+					<div class="btn btn--sm hover obs28" id="btGameEight" type="button">8-Ball</div>
+					<div class="btn btn--sm hover obs28" id="btGameNine" type="button">9-Ball</div>
+					<div class="btn btn--sm hover obs28" id="btGameTen" type="button">10-Ball</div>
+					<div class="btn btn--sm hover obs28" id="btResetBalls" type="button">Reset</div>
+				</div>
+			</div>
+
+			<!-- Player 1 Ball Assignment (8-ball only) -->
+			<div class="input-row" id="btCpRowP1">
+				<label>P1 Balls:</label>
+				<select id="btP1Set" class="select-field obs28">
+					<option value="unassigned">Unassigned</option>
+					<option value="solids">Solids (1-7)</option>
+					<option value="stripes">Stripes (9-15)</option>
+				</select>
+			</div>
+
+			<!-- Player 1 Ball Rack -->
+			<div class="input-row" id="btCpP1RackRow">
+				<div class="btcp-rack-wrap">
+					<div id="btCpP1Rack" class="btcp-rack noShow"></div>
+					<div id="btCpP1MidRack" class="btcp-rack btcp-rack--mid noShow"></div>
+					<div id="btCpP1FullRack" class="btcp-rack btcp-rack--full noShow"></div>
+				</div>
+			</div>
+
+			<!-- Player 2 Ball Assignment (8-ball only) -->
+			<div class="input-row" id="btCpRowP2">
+				<label>P2 Balls:</label>
+				<select id="btP2Set" class="select-field obs28">
+					<option value="unassigned">Unassigned</option>
+					<option value="solids">Solids (1-7)</option>
+					<option value="stripes">Stripes (9-15)</option>
+				</select>
+			</div>
+
+			<!-- Player 2 Ball Rack -->
+			<div class="input-row" id="btCpP2RackRow">
+				<div class="btcp-rack-wrap">
+					<div id="btCpP2Rack" class="btcp-rack noShow"></div>
+					<div id="btCpP2MidRack" class="btcp-rack btcp-rack--mid noShow"></div>
+					<div id="btCpP2FullRack" class="btcp-rack btcp-rack--full noShow"></div>
+				</div>
+			</div>
+		</section>
+
+
+	</div>
+
+	<!-- Reset Confirmation Modal -->
+	<div id="btResetConfirmModal" class="bt-modal noShow" style="display: none;">
+		<div class="bt-modal__panel">
+			<div class="bt-modal__header">
+				<div class="bt-modal__title">Confirm Reset</div>
+				<div class="bt-modal__close" id="btResetConfirmClose">&times;</div>
+			</div>
+			<div class="bt-confirm-body">
+				<div class="bt-confirm-message">Clear all pocketed balls? This will reset all balls to unselected (game type and player assignments will remain unchanged).</div>
+				<div class="bt-confirm-actions">
+					<div class="btn btn--primary hover obs28" id="btConfirmResetBtn">Reset</div>
+					<div class="btn hover obs28" id="btConfirmCancelBtn">Cancel</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Load the Billiards Controller -->
+	<script type="module" src="./BilliardsController.js"></script>
+
+	<script>
+		// Display version number
+		document.getElementById('verNum').textContent = versionNum;
+	</script>
+
+</body>
+</html>

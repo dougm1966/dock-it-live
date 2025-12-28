@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check Assets - Dock-It.live</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 { color: #4ec9b0; }
+    .section {
+      background: #252526;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      border-left: 4px solid #007acc;
+    }
+    button {
+      background: #007acc;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+    button:hover { background: #005a9e; }
+    pre {
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    .asset-card {
+      background: #1e1e1e;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .asset-card img {
+      max-width: 200px;
+      max-height: 150px;
+      border: 2px solid #007acc;
+      border-radius: 5px;
+    }
+    .asset-info { flex: 1; }
+    .badge {
+      display: inline-block;
+      background: #007acc;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Asset Database Inspector</h1>
+
+  <div class="section">
+    <h2>Database: dock_it_db</h2>
+    <button onclick="loadAssets()">🔄 Refresh Assets</button>
+    <button onclick="clearDatabase()">🗑️ Clear All Assets</button>
+  </div>
+
+  <div class="section">
+    <h2>Assets Found: <span id="asset-count">0</span></h2>
+    <div id="asset-list"></div>
+  </div>
+
+  <div class="section">
+    <h2>Raw Database Dump</h2>
+    <button onclick="dumpDatabase()">📋 Dump Full Database</button>
+    <pre id="db-dump">Click "Dump Full Database" to see raw data</pre>
+  </div>
+
+  <script type="module">
+    import { dexieDB } from '../src/core/database/DexieWrapper.js';
+
+    // Make available globally
+    window.dexieDB = dexieDB;
+
+    async function loadAssets() {
+      try {
+        await dexieDB.open();
+
+        const assets = await dexieDB.listAssets();
+        document.getElementById('asset-count').textContent = assets.length;
+
+        const listDiv = document.getElementById('asset-list');
+
+        if (assets.length === 0) {
+          listDiv.innerHTML = '<p style="color: #858585;">No assets found in database.</p>';
+          return;
+        }
+
+        listDiv.innerHTML = '';
+
+        for (const asset of assets) {
+          const card = document.createElement('div');
+          card.className = 'asset-card';
+
+          // Get object URL for preview
+          const url = await dexieDB.getAssetObjectUrl(asset.id);
+
+          card.innerHTML = `
+            <img src="${url}" alt="${asset.name}">
+            <div class="asset-info">
+              <div>
+                <span class="badge">${asset.type || 'unknown'}</span>
+                <span class="badge">${asset.mime}</span>
+              </div>
+              <h3 style="margin: 10px 0; color: #9cdcfe;">ID: ${asset.id}</h3>
+              <p><strong>Name:</strong> ${asset.name || 'Unnamed'}</p>
+              <p><strong>Size:</strong> ${(asset.size / 1024).toFixed(2)} KB</p>
+              <p><strong>Dimensions:</strong> ${asset.width}x${asset.height}</p>
+              <p><strong>Updated:</strong> ${new Date(asset.updatedAt).toLocaleString()}</p>
+              <p><strong>Tags:</strong> ${asset.tags?.join(', ') || 'None'}</p>
+            </div>
+          `;
+
+          listDiv.appendChild(card);
+        }
+
+        console.log('✅ Loaded', assets.length, 'assets');
+      } catch (error) {
+        console.error('❌ Error loading assets:', error);
+        alert('Error: ' + error.message);
+      }
+    }
+
+    async function dumpDatabase() {
+      try {
+        await dexieDB.open();
+
+        const assets = await dexieDB.db.assets.toArray();
+        const matchStates = await dexieDB.db.match_state.toArray();
+
+        // Remove blobs for readability
+        const assetsMeta = assets.map(a => ({
+          id: a.id,
+          type: a.type,
+          name: a.name,
+          size: a.size,
+          width: a.width,
+          height: a.height,
+          mime: a.mime,
+          tags: a.tags,
+          updatedAt: new Date(a.updatedAt).toLocaleString(),
+          hasBlob: !!a.blob,
+        }));
+
+        const dump = {
+          database: 'dock_it_db',
+          tables: {
+            assets: {
+              count: assets.length,
+              records: assetsMeta,
+            },
+            match_state: {
+              count: matchStates.length,
+              records: matchStates,
+            }
+          }
+        };
+
+        document.getElementById('db-dump').textContent = JSON.stringify(dump, null, 2);
+        console.log('📋 Database dump:', dump);
+      } catch (error) {
+        console.error('❌ Error dumping database:', error);
+        alert('Error: ' + error.message);
+      }
+    }
+
+    async function clearDatabase() {
+      if (!confirm('⚠️ This will delete ALL assets from dock_it_db. Continue?')) {
+        return;
+      }
+
+      try {
+        await dexieDB.clearAllData();
+        alert('✅ All data cleared');
+        await loadAssets();
+      } catch (error) {
+        console.error('❌ Error clearing database:', error);
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // Make functions global
+    window.loadAssets = loadAssets;
+    window.dumpDatabase = dumpDatabase;
+    window.clearDatabase = clearDatabase;
+
+    // Auto-load on page load
+    loadAssets();
+
+    console.log('🔍 Asset Inspector Ready');
+    console.log('Commands:');
+    console.log('  loadAssets() - Refresh asset list');
+    console.log('  dumpDatabase() - Show raw database dump');
+    console.log('  dexieDB - Access database directly');
+  </script>
+</body>
+</html>

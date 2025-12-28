@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shot Clock Control Test - Dock-It.live</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    h1 { color: #4ec9b0; }
+    .panel {
+      background: #252526;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      border-left: 4px solid #007acc;
+    }
+    button {
+      background: #007acc;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      margin: 5px;
+    }
+    button:hover { background: #005a9e; }
+    button:active { background: #004578; }
+    button.danger { background: #d32f2f; }
+    button.danger:hover { background: #b71c1c; }
+    button.success { background: #388e3c; }
+    button.success:hover { background: #2e7d32; }
+    .status {
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 5px;
+      background: #1e1e1e;
+      font-family: 'Courier New', monospace;
+    }
+    .time-display {
+      font-size: 72px;
+      font-weight: bold;
+      text-align: center;
+      color: #4ec9b0;
+      margin: 20px 0;
+    }
+    input[type="number"] {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: 1px solid #007acc;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 16px;
+      width: 80px;
+      margin: 0 10px;
+    }
+    .controls { margin: 20px 0; }
+    .note {
+      background: #264f78;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🕐 Shot Clock Control Test</h1>
+
+  <div class="note">
+    <strong>📺 Open the shot clock display in another window:</strong><br>
+    <a href="/shot-clock.html" target="_blank" style="color: #4ec9b0;">→ http://localhost:3003/shot-clock.html</a><br>
+    <small>Changes here will update the display in real-time!</small>
+  </div>
+
+  <div class="panel">
+    <h2>Current State</h2>
+    <div class="time-display" id="time-display">--</div>
+    <div class="status">
+      <div>Enabled: <span id="enabled-status">--</span></div>
+      <div>Running: <span id="running-status">--</span></div>
+      <div>Current Time: <span id="current-time">--</span>s</div>
+      <div>Duration: <span id="duration">--</span>s</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Controls</h2>
+
+    <div class="controls">
+      <h3>Enable/Disable</h3>
+      <button onclick="enable()" class="success">✅ Enable</button>
+      <button onclick="disable()" class="danger">❌ Disable</button>
+    </div>
+
+    <div class="controls">
+      <h3>Duration</h3>
+      <button onclick="setDuration(30)">30s</button>
+      <button onclick="setDuration(40)">40s</button>
+      <button onclick="setDuration(60)">60s</button>
+      <input type="number" id="custom-duration" value="40" min="1" max="300">
+      <button onclick="setCustomDuration()">Set Custom</button>
+    </div>
+
+    <div class="controls">
+      <h3>Timer Control</h3>
+      <button onclick="start()" class="success">▶️ Start</button>
+      <button onclick="stop()" class="danger">⏸️ Stop</button>
+      <button onclick="reset()">🔄 Reset</button>
+    </div>
+
+    <div class="controls">
+      <h3>Quick Tests</h3>
+      <button onclick="testWarning()">⚠️ Test Warning (10s)</button>
+      <button onclick="testCritical()">🚨 Test Critical (5s)</button>
+      <button onclick="testExpired()">💥 Test Expired (0s)</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { stateManager } from '../src/core/state/StateManager.js';
+
+    window.stateManager = stateManager;
+
+    // Initialize
+    await stateManager.init();
+    console.log('✅ Shot Clock Controls initialized');
+
+    // Subscribe to updates
+    stateManager.subscribeToShotClock(shotClock => {
+      updateUI(shotClock);
+    });
+
+    // Initial update
+    const state = await stateManager.getState();
+    updateUI(state.matchData.shotClock);
+
+    function updateUI(shotClock) {
+      document.getElementById('time-display').textContent = shotClock.currentTime;
+      document.getElementById('enabled-status').textContent = shotClock.enabled ? '✅ Yes' : '❌ No';
+      document.getElementById('running-status').textContent = shotClock.running ? '▶️ Running' : '⏸️ Stopped';
+      document.getElementById('current-time').textContent = shotClock.currentTime;
+      document.getElementById('duration').textContent = shotClock.duration;
+    }
+
+    // Control functions
+    window.enable = async () => {
+      await stateManager.setShotClockEnabled(true);
+      console.log('✅ Shot clock enabled');
+    };
+
+    window.disable = async () => {
+      await stateManager.setShotClockEnabled(false);
+      console.log('❌ Shot clock disabled');
+    };
+
+    window.setDuration = async (seconds) => {
+      await stateManager.setShotClockDuration(seconds);
+      await stateManager.resetShotClock();
+      console.log(`⏱️ Duration set to ${seconds}s`);
+    };
+
+    window.setCustomDuration = async () => {
+      const value = parseInt(document.getElementById('custom-duration').value);
+      if (value > 0) {
+        await setDuration(value);
+      }
+    };
+
+    window.start = async () => {
+      await stateManager.startShotClock();
+      console.log('▶️ Shot clock started');
+    };
+
+    window.stop = async () => {
+      await stateManager.stopShotClock();
+      console.log('⏸️ Shot clock stopped');
+    };
+
+    window.reset = async () => {
+      await stateManager.resetShotClock();
+      console.log('🔄 Shot clock reset');
+    };
+
+    window.testWarning = async () => {
+      await stateManager.updateShotClockTime(10);
+      await stateManager.setShotClockEnabled(true);
+      console.log('⚠️ Testing warning state (10s)');
+    };
+
+    window.testCritical = async () => {
+      await stateManager.updateShotClockTime(5);
+      await stateManager.setShotClockEnabled(true);
+      console.log('🚨 Testing critical state (5s)');
+    };
+
+    window.testExpired = async () => {
+      await stateManager.updateShotClockTime(0);
+      await stateManager.setShotClockEnabled(true);
+      console.log('💥 Testing expired state (0s)');
+    };
+
+    console.log('🎮 Shot Clock Controls Ready');
+    console.log('Open /shot-clock.html in another window to see live updates!');
+  </script>
+</body>
+</html>

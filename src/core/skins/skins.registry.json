@@ -1,0 +1,23 @@
+{
+  "skins": [
+    {
+      "id": "default",
+      "name": "Default Fullwidth",
+      "description": "Classic PCPL steelblue gradient theme with fullwidth bottom scoreboard",
+      "author": "Park County Pool League",
+      "version": "1.0.0",
+      "layout": "fullwidth-bottom",
+      "tags": ["classic", "traditional", "steelblue", "fullwidth"]
+    }
+  ],
+  "notes": {
+    "architecture": "Each skin is a COMPLETE CSS file containing both layout and visuals",
+    "path_pattern": "/src/modules/overlay/skins/{skinName}/{skinName}.css",
+    "future_skins": [
+      "pro-sleek - Modern design with gradients, glassmorphism, slide-in animations",
+      "compact-sidebar - Compact scoreboard boxes on left/right sides",
+      "minimalist - Ultra-clean minimal design with subtle animations",
+      "retro-arcade - Bold colors, pixel fonts, arcade-style graphics"
+    ]
+  }
+}
